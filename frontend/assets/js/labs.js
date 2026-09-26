@@ -3472,6 +3472,28 @@
     }
   }
 
+  function focusTestInput(key) {
+    closeSearchDropdown();
+    const input = document.getElementById(`lab-${key}`);
+    if (input) {
+      input.scrollIntoView({ behavior: "smooth", block: "center" });
+      input.focus();
+      input.style.transition = "all 0.3s ease";
+      input.style.boxShadow = "0 0 0 3px rgba(2, 132, 199, 0.45)";
+      setTimeout(() => {
+        input.style.boxShadow = "";
+      }, 1800);
+      const select = document.getElementById("chart-parameter");
+      if (select) {
+        let opt = select.querySelector(`option[value="${key}"]`);
+        if (opt) {
+          select.value = key;
+          updateChart();
+        }
+      }
+    }
+  }
+
   function addCatalogTest(testKey, btnEl) {
     const catTest = TEST_MAP.get(testKey);
     if (!catTest) return;
@@ -3485,6 +3507,8 @@
       max: catTest.max,
       isCustom: false,
     });
+
+    closeSearchDropdown();
 
     if (btnEl) {
       btnEl.outerHTML = `
@@ -3556,6 +3580,17 @@
 
     const q = (query || "").toLowerCase();
 
+    // Check if query matches any custom/added tests in this patient profile
+    const customList = Object.values(currentPatientCustomDefs || {});
+    const matchedCustom = customList.filter((t) => {
+      if (!q) return false;
+      return (
+        t.name.toLowerCase().includes(q) ||
+        (t.category && t.category.toLowerCase().includes(q)) ||
+        t.key.toLowerCase().includes(q)
+      );
+    });
+
     // Check if query matches any category heading
     const matchedCategories = CATEGORY_ORDER.filter(
       (cat) =>
@@ -3572,6 +3607,46 @@
     }).slice(0, 25);
 
     let html = "";
+
+    // 0. Custom & Added Tests in This Patient Profile
+    if (matchedCustom.length > 0) {
+      html += `
+        <div style="padding: 6px 12px; background: #e0f2fe; border-bottom: 1px solid #bae6fd; font-size: 11px; font-weight: 800; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px;">
+          ⭐ In This Patient's Profile (${matchedCustom.length} match${matchedCustom.length > 1 ? "es" : ""})
+        </div>
+        <div style="max-height: 180px; overflow-y: auto; background: #f0f9ff;">
+      `;
+      matchedCustom.forEach((t) => {
+        const refStr =
+          t.min !== null || t.max !== null
+            ? `Ref: ${t.min ?? "-"} - ${t.max ?? "-"} ${t.unit || ""}`
+            : t.unit || "";
+        html += `
+          <div
+            style="padding: 8px 14px; border-bottom: 1px solid #e0f2fe; display: flex; justify-content: space-between; align-items: center; background: white; transition: background 0.15s;"
+            onmouseover="this.style.background='#f8fafc'"
+            onmouseout="this.style.background='white'"
+          >
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <strong style="font-size: 12.5px; color: #0369a1;">${escapeHtml(t.name)}</strong>
+                <span style="font-size: 10px; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; font-weight: 700;">${escapeHtml(t.category || "Added")}</span>
+              </div>
+              <div style="font-size: 11px; color: #64748b;">${escapeHtml(refStr)}</div>
+            </div>
+            <button
+              type="button"
+              onclick="window.Tap2MedLabs.focusTestInput('${escapeHtml(t.key)}')"
+              class="btn"
+              style="background: #0284c7; color: white; border: none; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer;"
+            >
+              🔍 View in Flowsheet
+            </button>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
 
     // 1. Category Heading Matches with ACCORDION EXPANSION
     if (matchedCategories.length > 0) {
@@ -3626,9 +3701,7 @@
                         currentPatientCustomDefs &&
                         currentPatientCustomDefs[t.key],
                       );
-                      const isStandard = STANDARD_FLOWSHEET_KEYS.includes(
-                        t.key,
-                      );
+                      const isStandard = isFlowsheetField(t.key);
                       const refStr =
                         t.min !== null || t.max !== null
                           ? `Ref: ${t.min ?? "-"} - ${t.max ?? "-"} ${t.unit}`
@@ -3707,7 +3780,7 @@
         const isAdded = Boolean(
           currentPatientCustomDefs && currentPatientCustomDefs[t.key],
         );
-        const isStandard = STANDARD_FLOWSHEET_KEYS.includes(t.key);
+        const isStandard = isFlowsheetField(t.key);
         const refStr =
           t.min !== null || t.max !== null
             ? `Ref: ${t.min ?? "-"} - ${t.max ?? "-"} ${t.unit}`
@@ -3856,14 +3929,18 @@
     closeSearchDropdown();
   }
 
-  // Filter flowsheet headings and groups based on search term
+  // Filter flowsheet headings, groups, and custom tests based on search term
   function filterLabFields(term) {
     const effective = (term || "").trim().toLowerCase();
     let firstMatchedHeading = null;
 
+    // Filter standard sections
     document.querySelectorAll(".lab-section-header").forEach((heading) => {
       const grid = heading.nextElementSibling;
       if (!grid || !grid.classList.contains("lab-grid")) return;
+
+      // Skip dynamic section here; handled separately below
+      if (heading.closest("#dynamic-lab-section")) return;
 
       const headingText = heading.textContent.toLowerCase();
       const headingMatches = Boolean(
@@ -3892,6 +3969,33 @@
       }
     });
 
+    // Filter dynamic custom tests section
+    const dynamicSection = document.getElementById("dynamic-lab-section");
+    const dynamicGrid = document.getElementById("dynamic-lab-grid");
+    if (dynamicSection && dynamicGrid) {
+      let hasDynamicVisible = false;
+      dynamicGrid.querySelectorAll(".lab-input-group").forEach((group) => {
+        const input = group.querySelector("input");
+        const label = group.querySelector("label")?.textContent || "";
+        const key = input ? input.id.replace(/^lab-/, "") : "";
+        const match =
+          !effective ||
+          `${key} ${label}`.toLowerCase().includes(effective);
+        group.style.display = match ? "" : "none";
+        if (match) hasDynamicVisible = true;
+      });
+
+      const hasCustomTests = Object.keys(currentPatientCustomDefs || {}).length > 0;
+      if (!effective) {
+        dynamicSection.style.display = hasCustomTests ? "" : "none";
+      } else {
+        dynamicSection.style.display = hasDynamicVisible ? "" : "none";
+        if (hasDynamicVisible && !firstMatchedHeading) {
+          firstMatchedHeading = dynamicSection;
+        }
+      }
+    }
+
     if (firstMatchedHeading && effective) {
       firstMatchedHeading.scrollIntoView({
         behavior: "smooth",
@@ -3904,12 +4008,16 @@
   // REAL-TIME TREND CHART ENGINE
   // -------------------------------------------------------------
 
-  function updateChartParameterOptions() {
+  function updateChartParameterOptions(filterTerm = "") {
     const select = document.getElementById("chart-parameter");
     if (!select) return;
 
+    const searchTerm = (filterTerm || "").trim().toLowerCase();
     const currentSelected = select.value;
     select.innerHTML = "";
+    select.disabled = false;
+
+    const allMatchingOptions = [];
 
     // 1. ⭐ Added & Custom Investigations (Patient Specific)
     const customKeys = Object.keys(currentPatientCustomDefs || {});
@@ -3919,13 +4027,21 @@
 
     customKeys.forEach((key) => {
       const def = currentPatientCustomDefs[key];
-      const opt = document.createElement("option");
-      opt.value = key;
-      opt.textContent = `${def.name} ${def.unit ? `(${def.unit})` : ""}`;
-      dynamicGroup.appendChild(opt);
+      const match =
+        !searchTerm ||
+        key.toLowerCase().includes(searchTerm) ||
+        (def.name && def.name.toLowerCase().includes(searchTerm)) ||
+        (def.category && def.category.toLowerCase().includes(searchTerm));
+      if (match) {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = `${def.name} ${def.unit ? `(${def.unit})` : ""}`;
+        dynamicGroup.appendChild(opt);
+        allMatchingOptions.push(opt);
+      }
     });
 
-    if (customKeys.length > 0) {
+    if (dynamicGroup.children.length > 0) {
       select.appendChild(dynamicGroup);
     }
 
@@ -3997,10 +4113,18 @@
       cat.keys.forEach((k) => {
         const def = TEST_MAP.get(k);
         if (def) {
-          const opt = document.createElement("option");
-          opt.value = k;
-          opt.textContent = `${def.name} ${def.unit ? `(${def.unit})` : ""}`;
-          optgroup.appendChild(opt);
+          const match =
+            !searchTerm ||
+            k.toLowerCase().includes(searchTerm) ||
+            def.name.toLowerCase().includes(searchTerm) ||
+            def.category.toLowerCase().includes(searchTerm);
+          if (match) {
+            const opt = document.createElement("option");
+            opt.value = k;
+            opt.textContent = `${def.name} ${def.unit ? `(${def.unit})` : ""}`;
+            optgroup.appendChild(opt);
+            allMatchingOptions.push(opt);
+          }
         }
       });
       if (optgroup.children.length > 0) {
@@ -4008,73 +4132,33 @@
       }
     });
 
-    // 3. Select restored or first recorded test
-    if (
-      currentSelected &&
-      select.querySelector(`option[value="${currentSelected}"]`)
-    ) {
+    if (allMatchingOptions.length === 0) {
+      const emptyOpt = document.createElement("option");
+      emptyOpt.value = "";
+      emptyOpt.textContent = `No tests matching "${searchTerm}"`;
+      emptyOpt.disabled = true;
+      emptyOpt.selected = true;
+      select.appendChild(emptyOpt);
+      select.disabled = true;
+      updateChart();
+      return;
+    }
+
+    // Preserve previous selection if it's in the filtered list
+    const hasCurrent = select.querySelector(`option[value="${currentSelected}"]`);
+    if (currentSelected && hasCurrent) {
       select.value = currentSelected;
     } else {
-      // Auto-pick first parameter that has recorded data in activeLabRecords
-      let foundRecorded = null;
-      for (const rec of (activeLabRecords || [])) {
-        if (!rec.results) continue;
-        for (const [k, v] of Object.entries(rec.results)) {
-          if (k !== "_custom_defs" && v && !isNaN(parseFloat(v))) {
-            if (select.querySelector(`option[value="${k}"]`) && !foundRecorded) {
-              foundRecorded = k;
-              break;
-            }
-          }
-        }
-        if (foundRecorded) break;
-      }
-      if (foundRecorded) {
-        select.value = foundRecorded;
-      } else if (customKeys.length > 0) {
-        select.value = customKeys[0];
-      } else {
-        select.value = "haem_hb";
-      }
+      select.value = allMatchingOptions[0].value;
     }
+
+    updateChart();
   }
 
   function filterChartOptions() {
-    const select = document.getElementById("chart-parameter");
-    if (!select) return;
-
-    const searchTerm =
-      document
-        .getElementById("chart-search-input")
-        ?.value.trim()
-        .toLowerCase() || "";
-    const groups = select.querySelectorAll("optgroup");
-    const visibleOptions = [];
-
-    groups.forEach((group) => {
-      const options = [...group.querySelectorAll("option")];
-      options.forEach((option) => {
-        const match =
-          !searchTerm ||
-          option.textContent.toLowerCase().includes(searchTerm) ||
-          option.value.toLowerCase().includes(searchTerm);
-        option.hidden = Boolean(searchTerm) && !match;
-        if (match) visibleOptions.push(option);
-      });
-
-      const hasVisible = options.some((option) => !option.hidden);
-      group.hidden = Boolean(searchTerm) && !hasVisible;
-    });
-
-    if (
-      visibleOptions.length &&
-      !visibleOptions.some((option) => option.value === select.value)
-    ) {
-      select.value = visibleOptions[0].value;
-    }
-
-    select.disabled = Boolean(searchTerm) && visibleOptions.length === 0;
-    updateChart();
+    const input = document.getElementById("chart-search-input");
+    const term = input ? input.value : "";
+    updateChartParameterOptions(term);
   }
 
   function ensureChartJsLoaded() {
@@ -4346,6 +4430,7 @@
     addCatalogTest,
     showCustomCreator,
     submitInlineCustomTest,
+    focusTestInput,
     searchMedicalTestCatalog,
     ALL_TESTS,
     TEST_MAP,
