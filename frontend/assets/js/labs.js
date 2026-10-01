@@ -1,8 +1,3 @@
-/**
- * Tap2Med Modular Clinical Labs Engine & Trends System
- * Standardized test database, instant patient profile persistence, live trend charting.
- * Clean, decoupled component architecture.
- */
 
 (function () {
   "use strict";
