@@ -3436,6 +3436,14 @@
       dropdown.style.display = "none";
       dropdown.innerHTML = "";
     }
+
+  function clearSearchAndClose() {
+    const searchInput = document.getElementById("lab-search-input");
+    if (searchInput) searchInput.value = "";
+    closeSearchDropdown();
+    if (typeof filterLabFields === "function") filterLabFields("");
+  }
+
     searchDropdownOpen = false;
   }
 
@@ -3503,22 +3511,19 @@
       isCustom: false,
     });
 
-    closeSearchDropdown();
+    window.Tap2MedLabs.clearSearchAndClose();
 
     if (btnEl) {
       btnEl.outerHTML = `<input 
   type="text" 
-  placeholder="Enter value..." 
+  placeholder="Enter value" 
   class="input"
-  style="width: 110px; height: 28px; font-size: 11.5px; padding: 2px 6px; border-color: #38bdf8;"
+  style="width: 100px; height: 28px; font-size: 12px; padding: 2px 6px; border: 1.5px solid #38bdf8; border-radius: 4px;"
+  value="${escapeHtml(document.getElementById('lab-' + t.key) ? document.getElementById('lab-' + t.key).value : '')}"
   oninput="const target = document.getElementById('lab-${escapeHtml(t.key)}'); if(target) { target.value = this.value; window.Tap2MedLabs.onInput(target); }"
+  onchange="window.Tap2MedLabs.clearSearchAndClose()"
 />`;
     }
-
-    const searchInput = document.getElementById("lab-search-input");
-    if (searchInput) searchInput.value = "";
-    closeSearchDropdown();
-    filterLabFields("");
   }
 
   async function addAllCategoryTests(catName) {
@@ -3571,11 +3576,7 @@
 
     const input = document.getElementById("lab-search-input");
     renderSearchDropdown(input ? input.value : "", catName);
-
-    const searchInput = document.getElementById("lab-search-input");
-    if (searchInput) searchInput.value = "";
-    closeSearchDropdown();
-    filterLabFields("");
+    window.Tap2MedLabs.clearSearchAndClose();
   }
 
   function renderSearchDropdown(query, forceExpandCat = null) {
@@ -3811,10 +3812,12 @@
                 isAdded || isStandard
                   ? `<input 
   type="text" 
-  placeholder="Enter value..." 
+  placeholder="Enter value" 
   class="input"
-  style="width: 110px; height: 28px; font-size: 11.5px; padding: 2px 6px; border-color: #38bdf8;"
+  style="width: 100px; height: 28px; font-size: 12px; padding: 2px 6px; border: 1.5px solid #38bdf8; border-radius: 4px;"
+  value="${escapeHtml(document.getElementById('lab-' + t.key) ? document.getElementById('lab-' + t.key).value : '')}"
   oninput="const target = document.getElementById('lab-${escapeHtml(t.key)}'); if(target) { target.value = this.value; window.Tap2MedLabs.onInput(target); }"
+  onchange="window.Tap2MedLabs.clearSearchAndClose()"
 />`
                   : `
                 <button
@@ -3934,11 +3937,7 @@
       },
       initVal,
     );
-
-    const searchInput = document.getElementById("lab-search-input");
-    if (searchInput) searchInput.value = "";
-    closeSearchDropdown();
-    filterLabFields("");
+    window.Tap2MedLabs.clearSearchAndClose();
   }
 
   // Filter flowsheet headings, groups, and custom tests based on search term
@@ -4403,7 +4402,7 @@
       !searchWrap.contains(e.target) &&
       !dropdown.contains(e.target)
     ) {
-      closeSearchDropdown();
+      window.Tap2MedLabs.clearSearchAndClose();
     }
   });
 
@@ -4428,6 +4427,7 @@
     removeTest: removeCustomTest,
     populateInputsForDate: populateLabInputsForDate,
     checkRange,
+    clearSearchAndClose,
     onInput,
     updateChart,
     updateChartParameterOptions,
