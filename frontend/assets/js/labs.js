@@ -3436,15 +3436,14 @@
       dropdown.style.display = "none";
       dropdown.innerHTML = "";
     }
+    searchDropdownOpen = false;
+  }
 
   function clearSearchAndClose() {
     const searchInput = document.getElementById("lab-search-input");
     if (searchInput) searchInput.value = "";
     closeSearchDropdown();
     if (typeof filterLabFields === "function") filterLabFields("");
-  }
-
-    searchDropdownOpen = false;
   }
 
   function toggleCategoryInDropdown(catName, event) {
@@ -3511,7 +3510,7 @@
       isCustom: false,
     });
 
-    window.Tap2MedLabs.clearSearchAndClose();
+    clearSearchAndClose();
 
     if (btnEl) {
       btnEl.outerHTML = `<input 
@@ -3576,7 +3575,7 @@
 
     const input = document.getElementById("lab-search-input");
     renderSearchDropdown(input ? input.value : "", catName);
-    window.Tap2MedLabs.clearSearchAndClose();
+    clearSearchAndClose();
   }
 
   function renderSearchDropdown(query, forceExpandCat = null) {
@@ -3937,7 +3936,7 @@
       },
       initVal,
     );
-    window.Tap2MedLabs.clearSearchAndClose();
+    clearSearchAndClose();
   }
 
   // Filter flowsheet headings, groups, and custom tests based on search term
@@ -4402,7 +4401,7 @@
       !searchWrap.contains(e.target) &&
       !dropdown.contains(e.target)
     ) {
-      window.Tap2MedLabs.clearSearchAndClose();
+      clearSearchAndClose();
     }
   });
 
