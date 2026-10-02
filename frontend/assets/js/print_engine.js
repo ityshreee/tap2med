@@ -144,13 +144,13 @@ class PrintEngine {
     }
 
     const vitalsHtml = data.vitals
-      ? `<div style="font-size: 13px; color: #334155; margin-bottom: 6px;"><strong>Vitals:</strong> ${data.vitals}</div>`
+      ? `<div style="font-size: 11px; color: #000000; margin-bottom: 6px; text-transform: uppercase;"><strong>VITALS:</strong> ${data.vitals}</div>`
       : "";
     const complaintsHtml = data.complaints
-      ? `<div style="font-size: 13px; color: #334155; margin-bottom: 6px;"><strong>Complaints:</strong> ${data.complaints}</div>`
+      ? `<div style="font-size: 11px; color: #000000; margin-bottom: 6px; text-transform: uppercase;"><strong>COMPLAINTS:</strong> ${data.complaints}</div>`
       : "";
     const diagnosisHtml = data.diagnosis
-      ? `<div style="font-size: 14px; color: #0f172a; margin-bottom: 8px;"><strong>Diagnosis:</strong> <span style="font-weight: 700; text-transform: uppercase;">${data.diagnosis}</span></div>`
+      ? `<div style="font-size: 11px; color: #000000; margin-bottom: 8px; text-transform: uppercase;"><strong>DIAGNOSIS:</strong> <span style="font-weight: 700;">${data.diagnosis}</span></div>`
       : "";
 
     container.innerHTML = `
@@ -235,7 +235,7 @@ class PrintEngine {
         </table>
 
         <!-- Tests -->
-        ${data.tests ? `<div style="font-size: 13.5px; color: #0f172a; margin-bottom: 20px; padding: 10px 14px; background: #f8fafc; border-left: 3px solid #0284c7; border-radius: 4px;"><strong>Tests Suggested:</strong> ${data.tests}</div>` : ""}
+        ${data.tests ? `<div style="font-size: 11px; color: #000000; margin-bottom: 20px; padding: 10px 14px; background: #f8fafc; border-left: 3px solid #000000; border-radius: 4px; text-transform: uppercase;"><strong>TESTS SUGGESTED:</strong> ${data.tests}</div>` : ""}
 
         <!-- Footer / Advice / Signature -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 35px; font-size: 13.5px;">
