@@ -117,25 +117,25 @@ class PrintEngine {
 
         medsHtml += `
           <tr style="border-bottom: 1px solid #e2e8f0;">
-            <td style="padding: 6px 4px; text-align: center; font-weight: 600; color: #000000; vertical-align: middle;">
+            <td style="padding: 4px 3px; text-align: center; font-weight: 600; color: #000000; vertical-align: middle;">
               ${index + 1}
             </td>
-            <td style="padding: 6px 4px; vertical-align: middle;">
-              <strong style="color: #000000; font-size: 12px;">${med.name.toUpperCase()}</strong>
+            <td style="padding: 4px 3px; vertical-align: middle;">
+              <strong style="color: #000000; font-size: 10px;">${med.name.toUpperCase()}</strong>
             </td>
-            <td style="padding: 6px 4px; text-align: center; font-weight: 600; color: #000000; vertical-align: middle;">
+            <td style="padding: 4px 3px; text-align: center; font-weight: 600; color: #000000; vertical-align: middle;">
               ${doseDisplay}
             </td>
-            <td style="padding: 6px 4px; color: #000000; vertical-align: middle;">
+            <td style="padding: 4px 3px; color: #000000; vertical-align: middle;">
               ${whenDisplay}
             </td>
-            <td style="padding: 6px 4px; text-align: center; font-weight: 600; color: #000000; vertical-align: middle;">
+            <td style="padding: 4px 3px; text-align: center; font-weight: 600; color: #000000; vertical-align: middle;">
               ${freqDisplay}
             </td>
-            <td style="padding: 6px 4px; text-align: center; color: #000000; font-weight: 500; vertical-align: middle;">
+            <td style="padding: 4px 3px; text-align: center; color: #000000; font-weight: 500; vertical-align: middle;">
               ${durationDisplay}
             </td>
-            <td style="padding: 6px 4px; color: #000000; vertical-align: middle;">
+            <td style="padding: 4px 3px; color: #000000; vertical-align: middle;">
               ${remarksDisplay}
             </td>
           </tr>
@@ -217,16 +217,16 @@ class PrintEngine {
         <div style="font-size: 36px; font-weight: bold; font-family: serif; color: #0f172a; margin-bottom: 15px;">&#8471;</div>
 
         <!-- Medicines Table -->
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; margin-bottom: 25px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px; text-align: left; margin-bottom: 25px;">
          <thead>
           <tr style="border-top: 1.5px solid #0f172a; border-bottom: 1.5px solid #0f172a; background-color: #f8fafc;">
-           <th style="padding: 8px 6px; font-weight: 700; width: 26px; text-align: center; color: #1e293b;">#</th>
-           <th style="padding: 8px 8px; font-weight: 700; color: #1e293b;">Medicine</th>
-           <th style="padding: 8px 8px; font-weight: 700; width: 12%; text-align: center; color: #1e293b;">Dosage</th>
-           <th style="padding: 8px 8px; font-weight: 700; width: 15%; color: #1e293b;">When</th>
-           <th style="padding: 8px 8px; font-weight: 700; width: 13%; text-align: center; color: #1e293b;">Frequency</th>
-           <th style="padding: 8px 8px; font-weight: 700; width: 12%; text-align: center; color: #1e293b;">Duration</th>
-           <th style="padding: 8px 8px; font-weight: 700; width: 18%; color: #1e293b;">Instructions</th>
+           <th style="padding: 4px 3px; font-weight: 700; width: 3%; text-align: center; color: #1e293b;">#</th>
+           <th style="padding: 4px 3px; font-weight: 700; width: 30%; color: #1e293b;">Medicine</th>
+           <th style="padding: 4px 3px; font-weight: 700; width: 10%; text-align: center; color: #1e293b;">Dosage</th>
+           <th style="padding: 4px 3px; font-weight: 700; width: 12%; color: #1e293b;">When</th>
+           <th style="padding: 4px 3px; font-weight: 700; width: 11%; text-align: center; color: #1e293b;">Frequency</th>
+           <th style="padding: 4px 3px; font-weight: 700; width: 10%; text-align: center; color: #1e293b;">Duration</th>
+           <th style="padding: 4px 3px; font-weight: 700; width: 24%; color: #1e293b;">Instructions</th>
           </tr>
          </thead>
          <tbody>
@@ -250,7 +250,7 @@ class PrintEngine {
         </div>
 
         <!-- Bottom Footer Powered By -->
-        <div style="margin-top: 30px; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+        <div style="margin-top: 30px; font-size: 10px; color: #64748b; text-align: center; border-top: 1px solid #cbd5e1; padding-top: 10px;">
           <strong style="color: #0284c7;">Powered by Tap2Med - www.tap2med.com</strong>
         </div>
       </div>
