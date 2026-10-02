@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/assets/css/forms.css" />
     <link
       rel="stylesheet"
-      href="/assets/css/pages/dashboard.css?v=6"
+      href="/assets/css/pages/dashboard.css?v=7"
     />
     <link rel="stylesheet" href="/assets/css/print.css" />
   </head>
@@ -455,28 +455,37 @@
                 "
                 >Next Visit</label
               >
-              <div style="display: flex; align-items: center; gap: 10px">
+                            <div style="display: flex; align-items: center; gap: 8px">
+                <input type="hidden" id="patient-followup" value="3" />
                 <input
                   type="number"
-                  id="patient-followup"
+                  id="followup-months-input"
                   class="input"
-                  value="3"
+                  placeholder="0"
                   min="0"
                   style="
-                    width: 80px;
+                    width: 60px;
                     font-size: 14px;
                     background: white;
                     text-align: center;
                   "
                 />
-                <span
+                <span style="font-size: 14px; color: var(--text-muted); font-weight: 600;">Months</span>
+                
+                <input
+                  type="number"
+                  id="followup-days-input"
+                  class="input"
+                  placeholder="3"
+                  min="0"
                   style="
+                    width: 60px;
                     font-size: 14px;
-                    color: var(--text-muted);
-                    font-weight: 600;
+                    background: white;
+                    text-align: center;
                   "
-                  >Days</span
-                >
+                />
+                <span style="font-size: 14px; color: var(--text-muted); font-weight: 600;">Days</span>
               </div>
             </div>
 
@@ -706,7 +715,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="/assets/js/labs.js?v=20260914_3"></script>
-    <script src="/assets/js/pages/dashboard.js?v=6"></script>
+    <script src="/assets/js/pages/dashboard.js?v=7"></script>
     <script src="/assets/js/load_layouts.js?v=20260914_3"></script>
   </body>
 </html>

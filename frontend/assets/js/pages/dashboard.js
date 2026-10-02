@@ -110,6 +110,7 @@ function restorePrescriptionDraft(localToken) {
     if (window.syncTestChips) window.syncTestChips();
     if (advice) advice.value = draft.advice || "";
     if (followup) followup.value = draft.followup || "3";
+    if (window.updateFollowupUI) window.updateFollowupUI(draft.followup || 3);
 
     populatePrescriptionPad(draft.medicines);
     return true;
@@ -1027,6 +1028,7 @@ window.editRx = async function (
         visit.follow_up_days !== null && visit.follow_up_days !== undefined
           ? visit.follow_up_days
           : "3";
+    if (window.updateFollowupUI) window.updateFollowupUI(visit.follow_up_days !== null && visit.follow_up_days !== undefined ? visit.follow_up_days : 3);
 
     populatePrescriptionPad(visit.prescriptions);
 
@@ -2122,3 +2124,40 @@ if (document.readyState === "loading") {
 
 loadQueue();
 setInterval(loadQueue, 5000);
+
+// Follow-up conversion logic
+document.addEventListener("DOMContentLoaded", () => {
+  const monthsInput = document.getElementById("followup-months-input");
+  const daysInput = document.getElementById("followup-days-input");
+  const hiddenFollowup = document.getElementById("patient-followup");
+
+  function updateHiddenFollowup() {
+    if (!monthsInput || !daysInput || !hiddenFollowup) return;
+    const months = parseInt(monthsInput.value) || 0;
+    const days = parseInt(daysInput.value) || 0;
+    hiddenFollowup.value = (months * 30) + days;
+    if (typeof savePrescriptionDraft === "function") savePrescriptionDraft();
+  }
+
+  if (monthsInput) monthsInput.addEventListener("input", updateHiddenFollowup);
+  if (daysInput) daysInput.addEventListener("input", updateHiddenFollowup);
+});
+
+window.updateFollowupUI = function(totalDays) {
+  const monthsInput = document.getElementById("followup-months-input");
+  const daysInput = document.getElementById("followup-days-input");
+  if (!monthsInput || !daysInput) return;
+  
+  totalDays = parseInt(totalDays);
+  if (isNaN(totalDays)) totalDays = 3;
+
+  if (totalDays === 0) {
+    monthsInput.value = "";
+    daysInput.value = "0";
+  } else {
+    const months = Math.floor(totalDays / 30);
+    const days = totalDays % 30;
+    monthsInput.value = months > 0 ? months : "";
+    daysInput.value = days > 0 ? days : (months > 0 ? "0" : "3");
+  }
+};
