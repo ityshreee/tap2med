@@ -3506,12 +3506,19 @@
     closeSearchDropdown();
 
     if (btnEl) {
-      btnEl.outerHTML = `
-        <span style="font-size: 11px; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 3px 8px; border-radius: 4px; border: 1px solid #bae6fd;">
-          ✓ In Profile
-        </span>
-      `;
+      btnEl.outerHTML = `<input 
+  type="text" 
+  placeholder="Enter value..." 
+  class="input"
+  style="width: 110px; height: 28px; font-size: 11.5px; padding: 2px 6px; border-color: #38bdf8;"
+  oninput="const target = document.getElementById('lab-${escapeHtml(t.key)}'); if(target) { target.value = this.value; window.Tap2MedLabs.onInput(target); }"
+/>`;
     }
+
+    const searchInput = document.getElementById("lab-search-input");
+    if (searchInput) searchInput.value = "";
+    closeSearchDropdown();
+    filterLabFields("");
   }
 
   async function addAllCategoryTests(catName) {
@@ -3564,6 +3571,11 @@
 
     const input = document.getElementById("lab-search-input");
     renderSearchDropdown(input ? input.value : "", catName);
+
+    const searchInput = document.getElementById("lab-search-input");
+    if (searchInput) searchInput.value = "";
+    closeSearchDropdown();
+    filterLabFields("");
   }
 
   function renderSearchDropdown(query, forceExpandCat = null) {
@@ -3797,11 +3809,13 @@
             <div>
               ${
                 isAdded || isStandard
-                  ? `
-                <span style="font-size: 11px; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 3px 8px; border-radius: 4px; border: 1px solid #bae6fd;">
-                  ✓ ${isStandard ? "In Flowsheet" : "In Profile"}
-                </span>
-              `
+                  ? `<input 
+  type="text" 
+  placeholder="Enter value..." 
+  class="input"
+  style="width: 110px; height: 28px; font-size: 11.5px; padding: 2px 6px; border-color: #38bdf8;"
+  oninput="const target = document.getElementById('lab-${escapeHtml(t.key)}'); if(target) { target.value = this.value; window.Tap2MedLabs.onInput(target); }"
+/>`
                   : `
                 <button
                   type="button"
@@ -3921,7 +3935,10 @@
       initVal,
     );
 
+    const searchInput = document.getElementById("lab-search-input");
+    if (searchInput) searchInput.value = "";
     closeSearchDropdown();
+    filterLabFields("");
   }
 
   // Filter flowsheet headings, groups, and custom tests based on search term
