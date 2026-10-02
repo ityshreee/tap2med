@@ -295,6 +295,7 @@
   letter-spacing: 0.04em;
 }
 .prescription-row {
+  cursor: grab;
   display: grid !important;
   grid-template-columns:
     22px 64px minmax(100px, 2fr)
@@ -362,6 +363,7 @@
 
 @media (max-width: 768px) {
   .prescription-row {
+  cursor: grab;
     grid-template-columns: 1fr; /* Stacks vertically on mobile so it doesn't get crushed */
   }
 }
@@ -491,6 +493,7 @@
 }
 @media (max-width: 640px) {
   .prescription-row {
+  cursor: grab;
     grid-template-columns: 1fr;
   }
   .dashboard-layout {
@@ -590,4 +593,9 @@
 .lab-input-group input {
   width: 100%;
   max-width: 150px;
+}
+
+.dragging {
+  opacity: 0.5;
+  cursor: grabbing !important;
 }

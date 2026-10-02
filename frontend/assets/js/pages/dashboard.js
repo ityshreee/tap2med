@@ -368,6 +368,36 @@ window.addPrescriptionRow = function () {
     <input type="hidden" class="rx-freq" />
     <input type="hidden" class="rx-dosage" />
   `;
+  
+  // Drag and Drop Logic
+  row.setAttribute("draggable", "true");
+  row.addEventListener("dragstart", (e) => {
+    row.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+  });
+  row.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    const draggingRow = container.querySelector(".dragging");
+    if (!draggingRow || draggingRow === row) return;
+    const bounding = row.getBoundingClientRect();
+    const offset = e.clientY - bounding.top;
+    if (offset > bounding.height / 2) {
+      row.after(draggingRow);
+    } else {
+      row.before(draggingRow);
+    }
+  });
+  row.addEventListener("drop", (e) => {
+    e.preventDefault();
+  });
+  row.addEventListener("dragend", () => {
+    row.classList.remove("dragging");
+    updateRowNumbers();
+    if (typeof savePrescriptionDraft === "function") {
+      savePrescriptionDraft();
+    }
+  });
+
   container.appendChild(row);
   updateFreq(row.querySelector(".rx-med"));
 };
