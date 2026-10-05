@@ -643,309 +643,16 @@ function renderActiveHeader({
   <button onclick="openLabsModal()" class="btn btn-sm btn-secondary" style="margin-left: 15px; background: white; font-size: 12px; height: 28px; box-shadow: none;">View Labs & Trends</button>`;
 }
 
-async function loadQueue() {
-  if (!clinicId) return;
 
-  try {
-    const response = await fetch(
-      `/api/clinics/queue/${encodeURIComponent(clinicId)}`,
-    );
-    if (!response.ok) throw new Error("Queue request failed");
 
-    const data = await response.json();
-    doctorName.textContent = data.doctor_name || "Doctor";
-    clinicName.textContent = data.clinic_name || "Clinic";
-
-    const waitingQueue = data.queue
-      ? data.queue.filter((p) => p.status === "waiting")
-      : [];
-    window.currentWaitingTokens = waitingQueue.map((p) => p.local_token);
-
-    const queueCountBadge = document.getElementById("queue-count");
-    if (queueCountBadge)
-      queueCountBadge.textContent = `${waitingQueue.length} Waiting`;
-
-    const queueList = document.getElementById("queue-list");
-    queueList.innerHTML = "";
-
-    if (waitingQueue.length === 0) {
-      const currentTokenElement = document.getElementById("current-token");
-      if (
-        (!currentLocalToken ||
-          !currentTokenElement ||
-          !currentTokenElement.innerHTML.includes("EDITING")) &&
-        currentTokenElement
-      ) {
-        currentTokenElement.textContent = "—";
-        currentLocalToken = null;
-      }
-      setPrescriptionStatus("Waiting...", "warning");
-      queueList.innerHTML =
-        '<div class="queue-card text-muted" style="padding:16px;">No patients waiting</div>';
-    } else {
-      waitingQueue.forEach((patient) => {
-        const shortCode = getShortCode(patient.daily_token_number);
-        const card = document.createElement("div");
-        card.dataset.token = patient.local_token;
-        card.className = `queue-card ${currentLocalToken === patient.local_token ? "active" : ""}`;
-        card.style.cursor = "pointer";
-
-        let typeBadge = "";
-        if (patient.visit_type === "followup")
-          typeBadge = `<span style="font-size: 11px; background: #fef08a; color: #b45309; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 800; text-transform: uppercase;">Follow-up</span>`;
-        else if (patient.visit_type === "appointment")
-          typeBadge = `<span style="font-size: 11px; background: #e0e7ff; color: #0369a1; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 800; text-transform: uppercase;">Appointment</span>`;
-        else
-          typeBadge = `<span style="font-size: 11px; background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 800; text-transform: uppercase;">Walk-in</span>`;
-
-        let cityText = patient.city
-          ? `<span style="font-size: 12px; color: var(--text-muted); font-weight: 500; margin-left: 6px;">(${patient.city})</span>`
-          : "";
-
-        card.innerHTML = `
-          <div class="token-number">#${shortCode}</div>
-          <div class="patient-details">
-            <strong style="font-size: 16px;">${patient.patient_name || "Patient"} ${cityText} ${typeBadge}</strong>
-            <span>ID: ${patient.display_id || "--"}</span>
-          </div>
-          <button onclick="removePatientFromQueue('${patient.local_token}', event)" title="Remove patient from queue" style="position:absolute; right:12px; bottom:12px; width:28px; height:28px; border:none; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:#fff1f2; color:#be123c; font-size:14px; cursor:pointer; box-shadow:0 6px 14px rgba(190,18,60,0.12); border:1px solid #fecdd3;">✕</button>
-        `;
-
-        card.onclick = async () => {
-          // 1. VISUAL LOCK: Create an overlay to physically block typing and show a massive loading state
-          let overlay = document.getElementById("consultation-overlay");
-          if (!overlay) {
-            overlay = document.createElement("div");
-            overlay.id = "consultation-overlay";
-            overlay.style.cssText =
-              "position:absolute; inset:0; background:rgba(255,255,255,0.85); backdrop-filter:blur(4px); z-index:50; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:16px; font-size:20px; font-weight:800; color:var(--primary-color);";
-
-            const consultCard = document.querySelector(".consultation-card");
-            if (consultCard) {
-              consultCard.style.position = "relative";
-              consultCard.appendChild(overlay);
-            }
-          }
-          overlay.innerHTML =
-            '<span style="font-size:32px; margin-bottom:10px;"></span> Loading Patient Data...';
-          overlay.style.display = "flex";
-
-          // Visually update the left queue
-          document
-            .querySelectorAll(".queue-card")
-            .forEach((c) => c.classList.remove("active"));
-          card.classList.add("active");
-          card.parentNode.prepend(card);
-
-          currentLocalToken = patient.local_token;
-          const selectedToken = currentLocalToken;
-          sessionStorage.setItem(activePatientStorageKey, currentLocalToken);
-          window.currentPatientName = patient.patient_name || "Patient";
-          window.currentDisplayId = patient.display_id || "--";
-          setPrescriptionStatus("Loading...", "info");
-
-          if (currentToken) currentToken.textContent = `#${shortCode}`;
-
-          renderActiveHeader({
-            patientName: window.currentPatientName,
-            displayId: window.currentDisplayId,
-            cityText: patient.city || "",
-            age: patient.age,
-          });
-
-          // Clear form
-          clearPrescription();
-          historyContent.innerHTML =
-            '<p class="text-muted text-sm">Fetching secure records...</p>';
-
-          // Await both backend requests before unlocking the UI
-          try {
-            await Promise.all([
-              fetch("/api/events/queue/top", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  clinic_id: clinicId,
-                  local_token: patient.local_token,
-                }),
-              }),
-              loadHistory(selectedToken).then(() =>
-                restorePrescriptionDraft(selectedToken),
-              ),
-              fetchActiveVitals(),
-            ]);
-          } catch (e) {
-            console.error(e);
-          }
-
-          // Remove lock and set cursor
-          overlay.style.display = "none";
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          const cEl = document.getElementById("patient-complaints");
-          if (cEl) cEl.focus();
-        };
-
-        queueList.appendChild(card);
-      });
-
-      if (!currentLocalToken && waitingQueue.length > 0) {
-        const savedToken = sessionStorage.getItem(activePatientStorageKey);
-        const firstPatient =
-          waitingQueue.find((patient) => patient.local_token === savedToken) ||
-          waitingQueue[0];
-        currentLocalToken = firstPatient.local_token;
-        sessionStorage.setItem(activePatientStorageKey, currentLocalToken);
-        setPrescriptionStatus("Waiting...", "warning");
-        if (currentToken)
-          currentToken.textContent = `#${getShortCode(firstPatient.daily_token_number)}`;
-        window.currentPatientName = firstPatient.patient_name || "Patient";
-        window.currentDisplayId = firstPatient.display_id || "--";
-
-        renderActiveHeader({
-          patientName: window.currentPatientName,
-          displayId: window.currentDisplayId,
-          cityText: firstPatient.city || "",
-          age: firstPatient.age,
-        });
-
-        clearPrescription();
-        loadHistory(currentLocalToken).then(() =>
-          restorePrescriptionDraft(currentLocalToken),
-        );
-        const firstCard = queueList.firstChild;
-        if (firstCard) firstCard.classList.add("active");
-      }
-    }
-
-    const completedQueue = data.queue
-      ? data.queue.filter((p) => p.status === "completed")
-      : [];
-    const completedList = document.getElementById("completed-list");
-    if (completedList) {
-      completedList.innerHTML = "";
-      if (completedQueue.length === 0) {
-        completedList.innerHTML =
-          '<div class="queue-card text-muted" style="padding:16px; font-size:14px;">No completed patients</div>';
-      } else {
-        completedQueue.forEach((patient) => {
-          const shortCode = getShortCode(patient.daily_token_number);
-          const card = document.createElement("div");
-          card.className = "queue-card";
-          card.style.background = "#f8fafc";
-          card.style.cursor = "default";
-          card.innerHTML = `
-            <div class="token-number" style="color: #64748b; font-size: 18px;">#${shortCode}</div>
-            <div class="patient-details" style="flex: 1;">
-              <strong style="font-size: 15px; color: #475569;">${patient.patient_name || "Patient"}</strong>
-              <span style="color: var(--success-color); font-size: 12px;">Completed</span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <button onclick="editRx('${patient.local_token}', ${patient.daily_token_number}, '${(patient.patient_name || "Patient").replace(/'/g, "\\'")}', '${patient.display_id || "--"}')" class="btn btn-ghost" style="padding: 4px 8px; font-size: 11px; color: #ef4444; border: 1px dashed #fca5a5;">Edit</button>
-              <button onclick="openLabsModal('${patient.local_token}', '${(patient.patient_name || "Patient").replace(/'/g, "\\'")}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; background: white; border: 1px dashed #cbd5e1;">Labs</button>
-              <button onclick="rePrintRx('${patient.local_token}', '${(patient.patient_name || "Patient").replace(/'/g, "\\'")}', '${patient.display_id || "--"}')" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; background: white;">Print</button>
-            </div>
-          `;
-          completedList.appendChild(card);
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Queue error:", error);
-  }
-}
-
-async function loadHistory(localToken) {
-  try {
-    const response = await fetch(
-      `/api/events/history/${encodeURIComponent(localToken)}?clinic_id=${clinicId}`,
-    );
-    if (!response.ok) throw new Error("History request failed");
-
-    const data = await response.json();
-    if (!data.history || data.history.length === 0) {
-      historyContent.innerHTML =
-        '<p class="text-muted text-sm">No previous visits recorded.</p>';
-      return;
-    }
-
-    historyContent.innerHTML = "";
-    data.history.forEach((visit) => {
-      const date = new Date(visit.timestamp).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-      let historyHTML = "";
-
-      if (visit.complaints)
-        historyHTML += `<div style="margin-bottom:8px; font-size:13px; color:#475569;"><strong>C/E:</strong> ${visit.complaints}</div>`;
-      if (visit.diagnosis)
-        historyHTML += `<div style="margin-bottom:12px; font-size:13px; color:#0f172a;"><strong>Dx:</strong> ${visit.diagnosis}</div>`;
-
-      if (visit.prescriptions && visit.prescriptions.length > 0) {
-        historyHTML += `<div style="margin-top:10px; font-size:13px; color:#0f172a;"><strong>Rx:</strong><ul style="margin:5px 0; padding-left:20px;">`;
-        visit.prescriptions.forEach((rx) => {
-          historyHTML += `<li style="margin-bottom: 4px;"><strong>${rx.name}</strong> <br><span class="text-muted" style="font-size:12px;">${rx.instructions || ""}</span></li>`;
-        });
-        historyHTML += "</ul></div>";
-      }
-      if (visit.tests_suggested)
-        historyHTML += `<div style="margin-top:12px; font-size:13px; color:#0284c7;"><strong>Tests:</strong> ${visit.tests_suggested}</div>`;
-
-      const card = document.createElement("details");
-      card.style.background = "#fff";
-      card.style.border = "1px solid #e2e8f0";
-      card.style.borderRadius = "8px";
-      card.style.padding = "12px";
-      card.style.marginBottom = "10px";
-      card.style.cursor = "pointer";
-
-      card.innerHTML = `
-        <summary style="font-weight: 600; color: var(--primary-color); outline: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;">${date}<button type="button" class="btn btn-secondary copy-to-pad-btn" style="height: 30px; padding: 0 10px; font-size: 12px; color: var(--primary-color);">↻ Copy to Pad</button></summary>
-        <div style="padding-top: 10px; border-top: 1px solid #e2e8f0; margin-top: 10px;">
-          ${historyHTML || "<p class='text-muted text-sm'>No details recorded.</p>"}
-        </div>
-      `;
-      const copyButton = card.querySelector(".copy-to-pad-btn");
-      copyButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        copyVisitToPad(visit.prescriptions);
-      });
-      historyContent.appendChild(card);
-    });
-  } catch (error) {
-    console.error("History error:", error);
-  }
-}
-
-window.removePatientFromQueue = async function (localToken, event) {
-  if (event) event.stopPropagation();
-  if (!confirm("Remove this patient from the queue?")) return;
-
-  try {
-    const response = await fetch("/api/events/queue/remove", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clinic_id: clinicId, local_token: localToken }),
-    });
-
-    if (!response.ok) throw new Error("Failed to remove patient from queue");
-    await loadQueue();
-  } catch (e) {
-    console.error("Failed to remove patient from queue", e);
-    alert("Failed to remove patient from queue.");
-  }
-};
 
 window.rePrintRx = async function (localToken, patientName, displayId) {
   try {
-    const response = await fetch(
+    const data = await ApiClient.request(
       `/api/events/history/${encodeURIComponent(localToken)}?clinic_id=${clinicId}`,
     );
-    const data = await response.json();
     if (!data.history || data.history.length === 0)
-      return alert("No prescription found.");
+      return ToastUI.showError();
 
     const visit = data.history[0];
     const today = new Date(visit.timestamp).toLocaleDateString("en-IN", {
@@ -973,7 +680,7 @@ window.rePrintRx = async function (localToken, patientName, displayId) {
     // Call the isolated print engine
     window.PrintEngine.printRx(printData);
   } catch (e) {
-    alert("Failed to load prescription for printing.");
+    ToastUI.showError();
     console.error(e);
   }
 };
@@ -985,14 +692,9 @@ window.editRx = async function (
   displayId,
 ) {
   try {
-    const response = await fetch(
-      `/api/events/history/${encodeURIComponent(localToken)}?clinic_id=${clinicId}`,
-    );
-    if (!response.ok)
-      throw new Error("Server returned HTTP " + response.status);
-    const data = await response.json();
+    const data = await ApiClient.request(`/api/events/history/${encodeURIComponent(localToken)}?clinic_id=${clinicId}`);
     if (!data.history || data.history.length === 0)
-      return alert("No history found to edit.");
+      return ToastUI.showError();
 
     const visit = data.history[0];
     currentLocalToken = localToken;
@@ -1120,7 +822,7 @@ async function completeVisit() {
   setPrescriptionStatus("Saving...", "warning");
 
   try {
-    const response = await fetch("/api/events/complete", {
+    await ApiClient.request("/api/events/complete", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1134,8 +836,6 @@ async function completeVisit() {
         follow_up_days: follow_up_days,
       }),
     });
-
-    if (!response.ok) throw new Error("Prescription save failed");
 
     setPrescriptionStatus("Sent to WhatsApp", "success");
 
@@ -1173,11 +873,11 @@ async function completeVisit() {
     const currentTokenEl = document.getElementById("current-token");
     if (currentTokenEl) currentTokenEl.textContent = `#--`;
 
-    await loadQueue();
+    await 
   } catch (error) {
     console.error("Complete visit error:", error);
     setPrescriptionStatus("Failed to Send", "danger");
-    alert("The prescription could not be saved.");
+    ToastUI.showError();
   } finally {
     isSaving = false;
   }
@@ -1222,70 +922,8 @@ window.printQRCode = function () {
 };
 
 // Vitals Modal Logic
-function calculateBMI(weight, height) {
-  const weightKg = Number.parseFloat(weight);
-  const heightCm = Number.parseFloat(height);
-  if (
-    !Number.isFinite(weightKg) ||
-    !Number.isFinite(heightCm) ||
-    weightKg <= 0 ||
-    heightCm <= 0
-  ) {
-    return null;
-  }
-  const heightMeters = heightCm / 100;
-  return weightKg / (heightMeters * heightMeters);
-}
 
-function updateBMIDisplay() {
-  const bmiDisplay = document.getElementById("vital-bmi");
-  if (!bmiDisplay) return;
-  const bmi = calculateBMI(
-    document.getElementById("vital-wt")?.value,
-    document.getElementById("vital-ht")?.value,
-  );
-  bmiDisplay.textContent = bmi === null ? "--" : bmi.toFixed(1);
-}
 
-window.openVitalsModal = async function () {
-  document.getElementById("vitals-modal").style.display = "flex";
-  [
-    "bp-sys",
-    "bp-dia",
-    "pr",
-    "wt",
-    "ht",
-    "temp",
-    "spo2",
-    "waist",
-    "hip",
-  ].forEach((id) => {
-    document.getElementById(`vital-${id}`).value = "";
-  });
-  updateBMIDisplay();
-
-  try {
-    const res = await fetch(`/api/clinics/queue/${clinicId}`);
-    const data = await res.json();
-    const activePatient = data.queue.find(
-      (p) => p.local_token === currentLocalToken,
-    );
-
-    if (activePatient && activePatient.vitals) {
-      const v = activePatient.vitals;
-      document.getElementById("vital-bp-sys").value = v.bp_sys || "";
-      document.getElementById("vital-bp-dia").value = v.bp_dia || "";
-      document.getElementById("vital-pr").value = v.pr || "";
-      document.getElementById("vital-wt").value = v.wt || "";
-      document.getElementById("vital-ht").value = v.ht || "";
-      updateBMIDisplay();
-      document.getElementById("vital-temp").value = v.temp || "";
-      document.getElementById("vital-spo2").value = v.spo2 || "";
-      document.getElementById("vital-waist").value = v.waist || "";
-      document.getElementById("vital-hip").value = v.hip || "";
-    }
-  } catch (e) {}
-};
 
 document
   .getElementById("vital-wt")
@@ -1294,92 +932,15 @@ document
   .getElementById("vital-ht")
   ?.addEventListener("input", updateBMIDisplay);
 
-window.closeVitalsModal = function () {
-  document.getElementById("vitals-modal").style.display = "none";
-};
 
-window.submitVitals = async function () {
-  const payload = {
-    bp_sys: document.getElementById("vital-bp-sys").value.trim() || null,
-    bp_dia: document.getElementById("vital-bp-dia").value.trim() || null,
-    pr: document.getElementById("vital-pr").value.trim() || null,
-    wt: document.getElementById("vital-wt").value.trim() || null,
-    ht: document.getElementById("vital-ht").value.trim() || null,
-    temp: document.getElementById("vital-temp").value.trim() || null,
-    spo2: document.getElementById("vital-spo2").value.trim() || null,
-    waist: document.getElementById("vital-waist").value.trim() || null,
-    hip: document.getElementById("vital-hip").value.trim() || null,
-  };
 
-  try {
-    const res = await fetch(`/api/clinics/queue/${clinicId}`);
-    const data = await res.json();
-    const activePatient = data.queue.find(
-      (p) => p.local_token === currentLocalToken,
-    );
-    payload.is_paid =
-      activePatient && activePatient.vitals && activePatient.vitals.is_paid
-        ? true
-        : false;
 
-    await fetch("/api/events/vitals", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        clinic_id: clinicId,
-        local_token: currentLocalToken,
-        vitals: payload,
-      }),
-    });
 
-    closeVitalsModal();
-    fetchActiveVitals();
-  } catch (e) {
-    alert("Failed to save vitals.");
-  }
-};
-
-async function fetchActiveVitals() {
-  if (!currentLocalToken) return;
-  try {
-    const res = await fetch(`/api/clinics/queue/${clinicId}`);
-    const data = await res.json();
-    const activePatient = data.queue.find(
-      (p) => p.local_token === currentLocalToken,
-    );
-    const display = document.getElementById("doctor-vitals-display");
-
-    if (activePatient && activePatient.vitals) {
-      const v = activePatient.vitals;
-      let compiled = [];
-      if (v.bp_sys && v.bp_dia) compiled.push(`BP: ${v.bp_sys}/${v.bp_dia}`);
-      if (v.pr) compiled.push(`PR: ${v.pr} bpm`);
-      if (v.wt) compiled.push(`Wt: ${v.wt} kg`);
-      if (v.ht) compiled.push(`Ht: ${v.ht} cm`);
-      const bmi = calculateBMI(v.wt, v.ht);
-      if (bmi !== null) compiled.push(`BMI: ${bmi.toFixed(1)}`);
-      if (v.temp) compiled.push(`T: ${v.temp} °F`);
-      if (v.spo2) compiled.push(`SpO2: ${v.spo2}%`);
-
-      const displayWeight = compiled.join(" | ");
-      if (displayWeight) {
-        display.style.display = "block";
-        display.innerHTML = `<strong style="color: #475569;">Recorded Vitals:</strong> <span style="color: var(--primary-color); font-weight: 600;">${displayWeight}</span>`;
-      } else {
-        display.style.display = "none";
-      }
-    } else {
-      display.style.display = "none";
-    }
-  } catch (e) {}
-}
-
-setInterval(fetchActiveVitals, 2000);
 
 // --- LAB FLOWSHEET & TRENDS (DECOUPLED COMPONENT) ---
 window.openLabsModal = async function (localToken, patientName) {
   const token = localToken || currentLocalToken;
-  if (!token) return alert("Please select a patient first.");
+  if (!token) return ToastUI.showError();
   const name = patientName || window.currentPatientName || "Patient";
   if (window.Tap2MedLabs) {
     window.Tap2MedLabs.open(token, name, clinicId);
@@ -2122,8 +1683,8 @@ if (document.readyState === "loading") {
   initTestsDropdownEvents();
 }
 
-loadQueue();
-setInterval(loadQueue, 5000);
+
+
 
 // Follow-up conversion logic
 document.addEventListener("DOMContentLoaded", () => {
