@@ -1,30 +1,4 @@
-// Intercept fetch to enforce financial gatekeeper (only show paid patients in queue)
-const originalFetch = window.fetch;
-window.fetch = async function () {
-  const response = await originalFetch.apply(this, arguments);
-  if (
-    arguments[0] &&
-    typeof arguments[0] === "string" &&
-    arguments[0].includes("/api/clinics/queue/")
-  ) {
-    const clone = response.clone();
-    const data = await clone.json();
-    if (data.queue) {
-      data.queue = data.queue.filter((p) => {
-        if (p.status === "waiting") {
-          return p.vitals && p.vitals.is_paid === true;
-        }
-        return true;
-      });
-    }
-    return new Response(JSON.stringify(data), {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-  }
-  return response;
-};
+
 
 const clinicId = localStorage.getItem("tap2med_clinic_id");
 if (!clinicId || clinicId === "undefined" || clinicId === "null") {
@@ -66,7 +40,7 @@ document.addEventListener("input", (event) => {
       "#patient-complaints, #patient-diagnosis, #patient-tests, #rx-container",
     )
   ) {
-    savePrescriptionDraft();
+    
   }
 });
 
@@ -369,7 +343,7 @@ async function completeVisit() {
     const currentTokenEl = document.getElementById("current-token");
     if (currentTokenEl) currentTokenEl.textContent = `#--`;
 
-    await 
+    await window.QueueManager.loadQueue();
   } catch (error) {
     console.error("Complete visit error:", error);
     setPrescriptionStatus("Failed to Send", "danger");
@@ -421,12 +395,8 @@ window.printQRCode = function () {
 
 
 
-document
-  .getElementById("vital-wt")
-  ?.addEventListener("input", updateBMIDisplay);
-document
-  .getElementById("vital-ht")
-  ?.addEventListener("input", updateBMIDisplay);
+
+
 
 
 
@@ -482,7 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const months = parseInt(monthsInput.value) || 0;
     const days = parseInt(daysInput.value) || 0;
     hiddenFollowup.value = (months * 30) + days;
-    if (typeof savePrescriptionDraft === "function") savePrescriptionDraft();
+    
   }
 
   if (monthsInput) monthsInput.addEventListener("input", updateHiddenFollowup);
