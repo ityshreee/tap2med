@@ -32,13 +32,13 @@
       </div>
       <nav class="sidebar-nav">
         <a href="/dashboard" class="nav-item active"
-          ><span style="font-size: 18px"></span> Workspace</a
+          ><span class="extracted-inline-1"></span> Workspace</a
         >
         <a href="/directory" class="nav-item"
-          ><span style="font-size: 18px"></span> Patient Directory</a
+          ><span class="extracted-inline-2"></span> Patient Directory</a
         >
         <a href="/settings" class="nav-item"
-          ><span style="font-size: 18px"></span> Clinic Settings</a
+          ><span class="extracted-inline-3"></span> Clinic Settings</a
         >
       </nav>
       <div class="sidebar-footer">
@@ -60,17 +60,15 @@
           ☰
         </button>
         <div
-          class="header-status"
-          style="display: flex; align-items: center; gap: 15px"
+          class="extracted-inline-4 header-status"
         >
           <button
             onclick="showQRCode()"
-            class="btn btn-secondary"
-            style="padding: 6px 12px; font-size: 14px"
+            class="extracted-inline-5 btn btn-secondary"
           >
             Print Clinic QR
           </button>
-          <div style="display: flex; align-items: center; gap: 5px">
+          <div class="extracted-inline-6">
             <span class="pulse-dot"></span>Live Queue Active
           </div>
         </div>
@@ -94,14 +92,9 @@
           </div>
 
           <div
-            class="section-header"
-            style="
-              margin-top: 40px;
-              border-top: 2px dashed #e2e8f0;
-              padding-top: 20px;
-            "
+            class="extracted-inline-7 section-header"
           >
-            <h2 style="font-size: 16px; color: var(--text-muted)">
+            <h2 class="extracted-inline-8">
               Completed Today
             </h2>
           </div>
@@ -114,17 +107,11 @@
             <div class="consultation-header">
               <div>
                 <span class="eyebrow">Active Token</span>
-                <div style="display: flex; align-items: center; gap: 12px">
-                  <h2 style="margin: 0">Prescription Pad</h2>
+                <div class="extracted-inline-9">
+                  <h2 class="extracted-inline-10">Prescription Pad</h2>
                   <button
                     onclick="openVitalsModal()"
-                    class="btn btn-ghost"
-                    style="
-                      padding: 4px 8px;
-                      font-size: 12px;
-                      color: var(--primary-color);
-                      border: 1px dashed var(--primary-color);
-                    "
+                    class="extracted-inline-11 btn btn-ghost"
                   >
                     Update Vitals
                   </button>
@@ -137,16 +124,7 @@
 
             <div
               id="doctor-vitals-display"
-              style="
-                background: #f8fafc;
-                padding: 12px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-                font-size: 14px;
-                display: none;
-                border: 1px solid #e2e8f0;
-              "
-            ></div>
+             class="extracted-inline-12"></div>
 
             <div class="visit-history-preview">
               <details>
@@ -157,111 +135,50 @@
               </details>
             </div>
 
-            <div style="margin-bottom: 20px">
+            <div class="extracted-inline-13">
               <label
-                style="
-                  font-size: 12px;
-                  font-weight: 800;
-                  color: var(--text-muted);
-                  text-transform: uppercase;
-                  letter-spacing: 0.05em;
-                  display: block;
-                  margin-bottom: 8px;
-                "
-                >General Examination</label
+                 class="extracted-inline-14">General Examination</label
               >
               <textarea
                 id="patient-complaints"
-                class="textarea"
+                class="extracted-inline-15 textarea"
                 placeholder="e.g. Fever since 3 days, BP 120/80, chest clear..."
-                style="min-height: 60px; font-size: 14px; background: white"
               ></textarea>
             </div>
-            <div style="margin-bottom: 30px">
+            <div class="extracted-inline-16">
               <label
-                style="
-                  font-size: 12px;
-                  font-weight: 800;
-                  color: var(--text-muted);
-                  text-transform: uppercase;
-                  letter-spacing: 0.05em;
-                  display: block;
-                  margin-bottom: 8px;
-                "
-                >Diagnosis</label
+                 class="extracted-inline-17">Diagnosis</label
               >
               <input
                 type="text"
                 id="patient-diagnosis"
-                class="input"
+                class="extracted-inline-18 input"
                 placeholder="e.g. Viral Pyrexia"
-                style="font-size: 14px; font-weight: 600; background: white"
               />
             </div>
 
             <label
-              style="
-                font-size: 12px;
-                font-weight: 800;
-                color: var(--text-muted);
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                display: block;
-                margin-bottom: 8px;
-              "
-              >Medicines</label
+               class="extracted-inline-19">Medicines</label
             >
             <div
-              class="rx-table-wrap"
-              style="
-                margin-bottom: 12px;
-                border-radius: 8px;
-                border: 1px solid #e2e8f0;
-                background: #ffffff;
-                padding: 0;
-                width: 100%;
-                min-width: 0;
-                box-sizing: border-box;
-                overflow-x: auto;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-              "
+              class="extracted-inline-20 rx-table-wrap"
             >
               <div
-                class="rx-table-header"
-                style="
-                  display: grid;
-                  grid-template-columns:
-                    22px 64px minmax(100px, 2fr)
-                    44px 86px 82px 60px minmax(80px, 1.2fr) 26px;
-                  gap: 5px;
-                  padding: 8px 6px;
-                  background: #f8fafc;
-                  border-bottom: 1.5px solid #e2e8f0;
-                  font-size: 11px;
-                  font-weight: 700;
-                  color: #475569;
-                  text-transform: uppercase;
-                  letter-spacing: 0.03em;
-                  margin-bottom: 0;
-                  align-items: center;
-                  width: 100%;
-                  box-sizing: border-box;
-                "
+                class="extracted-inline-21 rx-table-header"
               >
-                <div style="text-align: center">#</div>
+                <div class="extracted-inline-22">#</div>
                 <div>Type</div>
                 <div>Medicine</div>
-                <div style="text-align: center">Dose</div>
+                <div class="extracted-inline-23">Dose</div>
                 <div>When</div>
                 <div>Frequency</div>
-                <div style="text-align: center">Duration</div>
+                <div class="extracted-inline-24">Duration</div>
                 <div>Notes</div>
                 <div></div>
               </div>
               <div
-                class="prescription-builder"
+                class="extracted-inline-25 prescription-builder"
                 id="rx-container"
-                style="width: 100%; min-width: 0; box-sizing: border-box"
               ></div>
             </div>
             <button
@@ -272,61 +189,29 @@
             </button>
 
             <div
-              style="
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 1px dashed #cbd5e1;
-              "
-            >
+             class="extracted-inline-26">
               <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  margin-bottom: 8px;
-                "
-              >
+               class="extracted-inline-27">
                 <label
-                  style="
-                    font-size: 12px;
-                    font-weight: 800;
-                    color: #0284c7;
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    margin: 0;
-                  "
-                  >Tests Requested</label
+                   class="extracted-inline-28">Tests Requested</label
                 >
                 <span
-                  style="font-size: 11.5px; color: #64748b; font-weight: 500"
-                >
+                 class="extracted-inline-29">
                   Search test or heading (e.g. Haematology, CBC, Lipid...)
                 </span>
               </div>
 
               <!-- Interactive Search & Dropdown Container -->
               <div
-                class="rx-tests-search-wrap"
-                style="position: relative; margin-bottom: 8px"
+                class="extracted-inline-30 rx-tests-search-wrap"
               >
-                <div style="display: flex; gap: 6px; align-items: center">
-                  <div style="position: relative; flex: 1">
+                <div class="extracted-inline-31">
+                  <div class="extracted-inline-32">
                     <input
                       type="text"
                       id="rx-tests-search"
-                      class="input"
+                      class="extracted-inline-33 input"
                       placeholder="Type a test (e.g. CBC, TSH) or category (e.g. Haematology)..."
-                      style="
-                        width: 100%;
-                        height: 36px;
-                        font-size: 13px;
-                        font-weight: 600;
-                        background: #ffffff;
-                        border: 1.5px solid #7dd3fc;
-                        padding: 6px 32px 6px 12px;
-                        box-sizing: border-box;
-                        border-radius: 6px;
-                      "
                       autocomplete="off"
                     />
                     <span
@@ -334,19 +219,8 @@
                       onclick="
                         window.clearTestSearch && window.clearTestSearch()
                       "
-                      style="
-                        display: none;
-                        position: absolute;
-                        right: 10px;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        cursor: pointer;
-                        color: #94a3b8;
-                        font-weight: bold;
-                        font-size: 13px;
-                      "
                       title="Clear search"
-                      >✕</span
+                       class="extracted-inline-34">✕</span
                     >
                   </div>
                   <button
@@ -356,18 +230,7 @@
                       window.toggleTestCategoriesDropdown &&
                         window.toggleTestCategoriesDropdown()
                     "
-                    class="btn btn-secondary btn-sm"
-                    style="
-                      height: 36px;
-                      padding: 0 14px;
-                      font-size: 12px;
-                      font-weight: 700;
-                      color: #0284c7;
-                      border: 1px solid #bae6fd;
-                      background: #f0f9ff;
-                      white-space: nowrap;
-                      border-radius: 6px;
-                    "
+                    class="extracted-inline-35 btn btn-secondary btn-sm"
                   >
                     Categories ▾
                   </button>
@@ -376,120 +239,59 @@
                 <!-- Floating Dropdown Menu -->
                 <div
                   id="rx-tests-dropdown"
-                  style="
-                    display: none;
-                    position: absolute;
-                    top: calc(100% + 4px);
-                    left: 0;
-                    right: 0;
-                    max-height: 380px;
-                    overflow-y: auto;
-                    background: #ffffff;
-                    border: 1.5px solid #38bdf8;
-                    border-radius: 8px;
-                    box-shadow:
-                      0 12px 28px -4px rgba(0, 0, 0, 0.15),
-                      0 4px 10px -2px rgba(0, 0, 0, 0.06);
-                    z-index: 1050;
-                    padding: 4px 0;
-                  "
-                ></div>
+                 class="extracted-inline-36"></div>
               </div>
 
               <!-- Selected Test Chips -->
               <div
                 id="rx-selected-tests-chips"
-                style="
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: 6px;
-                  margin-bottom: 8px;
-                "
-              ></div>
+               class="extracted-inline-37"></div>
 
               <textarea
                 id="patient-tests"
-                class="textarea"
+                class="extracted-inline-38 textarea"
                 placeholder="e.g. Complete Blood Count (CBC), Fasting Blood Sugar (FBS)... (Selected tests will appear here; you can also type custom tests directly)"
-                style="
-                  min-height: 60px;
-                  font-size: 13.5px;
-                  border-color: #bae6fd;
-                  background: #f0f9ff;
-                  line-height: 1.5;
-                "
               ></textarea>
             </div>
 
-            <div style="margin-top: 20px">
+            <div class="extracted-inline-39">
               <label
-                style="
-                  font-size: 12px;
-                  font-weight: 800;
-                  color: var(--text-muted);
-                  text-transform: uppercase;
-                  letter-spacing: 0.05em;
-                  display: block;
-                  margin-bottom: 8px;
-                "
-                >Advice</label
+                 class="extracted-inline-40">Advice</label
               >
               <textarea
                 id="patient-advice"
-                class="textarea"
+                class="extracted-inline-41 textarea"
                 placeholder="e.g. BED REST 5 DAYS"
-                style="min-height: 60px; font-size: 14px; background: white"
               ></textarea>
             </div>
 
-            <div style="margin-top: 20px">
+            <div class="extracted-inline-42">
               <label
-                style="
-                  font-size: 12px;
-                  font-weight: 800;
-                  color: var(--text-muted);
-                  text-transform: uppercase;
-                  letter-spacing: 0.05em;
-                  display: block;
-                  margin-bottom: 8px;
-                "
-                >Next Visit</label
+                 class="extracted-inline-43">Next Visit</label
               >
-                            <div style="display: flex; align-items: center; gap: 8px">
+                            <div class="extracted-inline-44">
                 <input type="hidden" id="patient-followup" value="3" />
                 <input
                   type="number"
                   id="followup-months-input"
-                  class="input"
+                  class="extracted-inline-45 input"
                   placeholder="0"
                   min="0"
-                  style="
-                    width: 60px;
-                    font-size: 14px;
-                    background: white;
-                    text-align: center;
-                  "
                 />
-                <span style="font-size: 14px; color: var(--text-muted); font-weight: 600;">Months</span>
+                <span class="extracted-inline-46">Months</span>
                 
                 <input
                   type="number"
                   id="followup-days-input"
-                  class="input"
+                  class="extracted-inline-47 input"
                   placeholder="3"
                   min="0"
-                  style="
-                    width: 60px;
-                    font-size: 14px;
-                    background: white;
-                    text-align: center;
-                  "
                 />
-                <span style="font-size: 14px; color: var(--text-muted); font-weight: 600;">Days</span>
+                <span class="extracted-inline-48">Days</span>
               </div>
             </div>
 
-            <div class="consultation-actions" style="margin-top: 25px">
+            <div class="extracted-inline-49 consultation-actions">
               <button id="print-btn" class="btn btn-primary btn-lg btn-block">
                 Save & Send to WhatsApp
               </button>
@@ -502,101 +304,45 @@
     <!-- WhatsApp Send Confirmation Modal -->
     <div id="send-confirm-modal" class="backdrop" style="display: none">
       <div
-        style="
-          background: white;
-          width: 100%;
-          max-width: 440px;
-          border-radius: 18px;
-          box-shadow: 0 20px 50px -22px rgba(15, 23, 42, 0.45);
-          overflow: hidden;
-        "
-      >
+       class="extracted-inline-50">
         <div
-          style="
-            padding: 24px 24px 18px;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 16px;
-          "
-        >
+         class="extracted-inline-51">
           <div>
             <div
-              style="
-                font-size: 12px;
-                color: #64748b;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                margin-bottom: 6px;
-              "
-            >
+             class="extracted-inline-52">
               Tap2Med says
             </div>
             <h3
-              style="
-                margin: 0;
-                font-size: 22px;
-                color: var(--primary-color);
-                font-weight: 800;
-              "
-            >
+             class="extracted-inline-53">
               Send prescription?
             </h3>
           </div>
           <button
             onclick="closeSendConfirmModal()"
-            style="
-              background: transparent;
-              border: none;
-              font-size: 28px;
-              color: #64748b;
-              cursor: pointer;
-              line-height: 1;
-            "
-          >
+           class="extracted-inline-54">
             &times;
           </button>
         </div>
-        <div style="padding: 24px">
+        <div class="extracted-inline-55">
           <p
-            style="
-              margin: 0 0 20px;
-              font-size: 15px;
-              color: #334155;
-              line-height: 1.6;
-            "
-          >
+           class="extracted-inline-56">
             This prescription will be sent to the patient on WhatsApp and cannot
             be sent again afterwards.
           </p>
           <div
-            style="
-              background: #f8fafc;
-              border: 1px solid #e2e8f0;
-              border-radius: 12px;
-              padding: 14px 16px;
-              margin-bottom: 20px;
-              color: #0f172a;
-              font-size: 14px;
-              font-weight: 600;
-            "
-          >
+           class="extracted-inline-57">
             Patient: <span id="send-confirm-patient-name">Current patient</span>
           </div>
-          <div style="display: flex; gap: 12px; justify-content: flex-end">
+          <div class="extracted-inline-58">
             <button
               onclick="closeSendConfirmModal()"
-              class="btn btn-ghost"
-              style="min-width: 100px"
+              class="extracted-inline-59 btn btn-ghost"
             >
               No
             </button>
             <button
               onclick="confirmSendPrescription()"
-              class="btn btn-primary"
-              style="min-width: 140px"
+              class="extracted-inline-60 btn btn-primary"
             >
               Yes, send
             </button>
@@ -608,37 +354,26 @@
     <!-- QR Code Standee Modal -->
     <div id="qrModal" class="backdrop">
       <div
-        style="
-          background: white;
-          padding: 40px;
-          border-radius: 16px;
-          text-align: center;
-          max-width: 380px;
-        "
-      >
-        <h2 style="margin-bottom: 5px; color: var(--primary-color)">
+       class="extracted-inline-61">
+        <h2 class="extracted-inline-62">
           Clinic Check-In QR
         </h2>
         <p
-          style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px"
-        >
+         class="extracted-inline-63">
           Display at reception for self check-in
         </p>
         <div
           id="dashboardQRCode"
-          style="display: flex; justify-content: center; margin-bottom: 25px"
-        ></div>
+         class="extracted-inline-64"></div>
         <button
           onclick="printQRCode()"
-          class="btn btn-primary btn-block"
-          style="background-color: var(--success-color)"
+          class="extracted-inline-65 btn btn-primary btn-block"
         >
           Print Check-In Poster
         </button>
         <button
           onclick="document.getElementById('qrModal').style.display = 'none'"
-          class="btn btn-ghost btn-block"
-          style="margin-top: 10px"
+          class="extracted-inline-66 btn btn-ghost btn-block"
         >
           Close
         </button>
@@ -648,66 +383,32 @@
     <!-- Hidden Printable QR Code Standee Layout -->
     <div id="print-qr-layout" class="print-only">
       <div
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          margin-bottom: 12px;
-        "
-      >
+       class="extracted-inline-67">
         <img
           src="/assets/logo/tap2med_logo.png"
-          style="width: 50px; height: 40px; object-fit: contain"
           onerror="this.style.display = 'none'"
-        />
+         class="extracted-inline-68"/>
         <span
-          style="
-            font-size: 32px;
-            font-weight: 800;
-            color: #0284c7;
-            font-family: &quot;Inter&quot;, sans-serif;
-          "
-          >Tap2Med</span
+           class="extracted-inline-69">Tap2Med</span
         >
       </div>
       <p
-        style="
-          font-size: 18px;
-          color: #64748b;
-          margin-top: 0;
-          margin-bottom: 20px;
-          font-weight: 600;
-        "
-      >
+       class="extracted-inline-70">
         Clinic Check-In
       </p>
       <h1
-        style="
-          font-size: 34px;
-          font-weight: 800;
-          color: #0f172a;
-          margin-bottom: 30px;
-        "
-      >
+       class="extracted-inline-71">
         Scan to Check-In
       </h1>
       <div
         id="print-qr-target"
-        style="display: flex; justify-content: center; margin-bottom: 30px"
-      ></div>
+       class="extracted-inline-72"></div>
       <h2
         id="print-qr-clinic-name"
-        style="
-          font-size: 28px;
-          font-weight: 800;
-          color: #0284c7;
-          margin-bottom: 8px;
-        "
-      >
+       class="extracted-inline-73">
         Clinic Name
       </h2>
-      <p style="font-size: 15px; color: #64748b; font-weight: 500">
+      <p class="extracted-inline-74">
         Powered by Tap2Med
       </p>
     </div>

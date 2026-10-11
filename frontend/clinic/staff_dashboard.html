@@ -11,21 +11,9 @@
     <link rel="stylesheet" href="/assets/css/buttons.css" />
     <link rel="stylesheet" href="/assets/css/pages/staff_dashboard.css" />
   </head>
-  <body style="background: #f8fafc">
+  <body class="extracted-inline-1">
     <header
-      class="top-header"
-      style="
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(8px);
-        padding: 16px 32px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 50;
-      "
+      class="extracted-inline-2 top-header"
     >
       <div class="brand-header">
         <img
@@ -38,24 +26,21 @@
         <div class="brand-divider"></div>
         <span class="brand-role">Reception</span>
       </div>
-      <div style="display: flex; gap: 12px">
+      <div class="extracted-inline-3">
         <a
           href="/staff-directory"
-          class="btn btn-secondary btn-sm"
-          style="background: white; font-weight: 600; text-decoration: none"
+          class="extracted-inline-4 btn btn-secondary btn-sm"
           >Patient Directory</a
         >
         <button
           onclick="showQRCode()"
-          class="btn btn-secondary btn-sm"
-          style="background: white; font-weight: 600"
+          class="extracted-inline-5 btn btn-secondary btn-sm"
         >
           Print Clinic QR
         </button>
         <button
           onclick="logout()"
-          class="btn btn-ghost btn-sm"
-          style="font-weight: 600"
+          class="extracted-inline-6 btn btn-ghost btn-sm"
         >
           Log Out
         </button>
@@ -64,119 +49,56 @@
 
     <main class="queue-grid">
       <div
-        style="
-          background: #ffffff;
-          border: 1px solid var(--border-color);
-          border-radius: 16px;
-          padding: 28px;
-          margin-bottom: 40px;
-          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-        "
-      >
+       class="extracted-inline-7">
         <h3
-          style="
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: var(--text-main);
-            font-size: 18px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-        >
-          <span style="font-size: 20px">Phone:</span> Manual Walk-in Check-In
+         class="extracted-inline-8">
+          <span class="extracted-inline-9">Phone:</span> Manual Walk-in Check-In
         </h3>
 
         <div
-          style="
-            display: flex;
-            gap: 16px;
-            align-items: flex-end;
-            flex-wrap: wrap;
-          "
-        >
-          <div style="flex: 1; min-width: 140px">
+         class="extracted-inline-10">
+          <div class="extracted-inline-11">
             <label
-              style="
-                font-size: 13px;
-                font-weight: 600;
-                color: var(--text-muted);
-                display: block;
-                margin-bottom: 8px;
-              "
-              >Patient Phone</label
+               class="extracted-inline-12">Patient Phone</label
             >
             <input
               type="tel"
               id="walkin-phone"
-              class="input"
+              class="extracted-inline-13 input"
               placeholder="10-digit number (Optional)"
               maxlength="10"
-              style="background: #f8fafc; width: 100%"
             />
           </div>
-          <div style="flex: 1; min-width: 140px">
+          <div class="extracted-inline-14">
             <label
-              style="
-                font-size: 13px;
-                font-weight: 600;
-                color: var(--text-muted);
-                display: block;
-                margin-bottom: 8px;
-              "
-              >Patient Name</label
+               class="extracted-inline-15">Patient Name</label
             >
             <input
               type="text"
               id="walkin-name"
-              class="input"
+              class="extracted-inline-16 input"
               placeholder="Full Name"
-              style="background: #f8fafc; width: 100%"
               required
             />
           </div>
-          <div style="flex: 1; min-width: 140px">
+          <div class="extracted-inline-17">
             <label
-              style="
-                font-size: 13px;
-                font-weight: 600;
-                color: var(--text-muted);
-                display: block;
-                margin-bottom: 8px;
-              "
-              >City (Optional)</label
+               class="extracted-inline-18">City (Optional)</label
             >
             <input
               type="text"
               id="walkin-city"
-              class="input"
+              class="extracted-inline-19 input"
               placeholder="e.g. New Delhi"
-              style="background: #f8fafc; width: 100%"
             />
           </div>
-          <div style="flex: 1; min-width: 140px">
+          <div class="extracted-inline-20">
             <label
-              style="
-                font-size: 13px;
-                font-weight: 600;
-                color: var(--text-muted);
-                display: block;
-                margin-bottom: 8px;
-              "
-              >Family Member</label
+               class="extracted-inline-21">Family Member</label
             >
             <select
               id="manual-member-id"
-              class="input"
-              style="
-                width: 100%;
-                height: 44px;
-                padding: 0 10px;
-                border-radius: 8px;
-                border: 1px solid #cbd5e1;
-                background: white;
-              "
+              class="extracted-inline-22 input"
             >
               <option value="0">Self</option>
               <option value="1">Spouse</option>
@@ -191,68 +113,36 @@
               <option value="10">Other Relative 2</option>
             </select>
           </div>
-          <div style="flex: 1; min-width: 140px">
+          <div class="extracted-inline-23">
             <label
-              style="
-                font-size: 13px;
-                font-weight: 600;
-                color: var(--text-muted);
-                display: block;
-                margin-bottom: 8px;
-              "
-              >Age</label
+               class="extracted-inline-24">Age</label
             >
             <input
               type="number"
               id="walkin-age"
-              class="input"
+              class="extracted-inline-25 input"
               min="0"
               max="120"
               step="1"
               placeholder="Age"
-              style="background: #f8fafc; width: 100%"
             />
           </div>
           <div
-            style="
-              flex: 0 0 auto;
-              display: flex;
-              align-items: center;
-              height: 44px;
-              padding-bottom: 12px;
-            "
-          >
+           class="extracted-inline-26">
             <label
-              style="
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                cursor: pointer;
-                margin-bottom: 0;
-                font-size: 14px;
-                font-weight: 600;
-                color: var(--text-main);
-                white-space: nowrap;
-              "
-            >
+             class="extracted-inline-27">
               <input
                 type="checkbox"
                 id="walkin-is-appt"
-                style="
-                  width: 18px;
-                  height: 18px;
-                  accent-color: var(--primary-color);
-                "
-              />
+               class="extracted-inline-28"/>
               Is Appt?
             </label>
           </div>
-          <div style="flex: 0 0 auto">
+          <div class="extracted-inline-29">
             <button
               onclick="manualCheckIn()"
-              class="btn btn-primary"
+              class="extracted-inline-30 btn btn-primary"
               id="btn-manual-checkin"
-              style="height: 44px; margin-bottom: 0; white-space: nowrap"
             >
               Generate Token
             </button>
@@ -260,65 +150,31 @@
         </div>
         <span
           id="manual-status"
-          style="
-            display: block;
-            margin-top: 12px;
-            font-size: 14px;
-            font-weight: 600;
-          "
-        ></span>
+         class="extracted-inline-31"></span>
       </div>
 
       <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-        "
-      >
+       class="extracted-inline-32">
         <h3
-          style="
-            margin: 0;
-            font-size: 20px;
-            color: var(--text-main);
-            font-weight: 800;
-          "
-        >
+         class="extracted-inline-33">
           Waiting Room
         </h3>
         <span
-          class="badge badge-info"
+          class="extracted-inline-34 badge badge-info"
           id="queue-count"
-          style="font-size: 14px; padding: 6px 12px"
           >Updating...</span
         >
       </div>
-      <div id="staff-queue-list" style="margin-bottom: 48px"></div>
+      <div id="staff-queue-list" class="extracted-inline-35"></div>
 
       <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-          padding-top: 32px;
-          border-top: 2px dashed #cbd5e1;
-        "
-      >
+       class="extracted-inline-36">
         <h3
-          style="margin: 0; font-size: 18px; color: #64748b; font-weight: 700"
-        >
+         class="extracted-inline-37">
           Completed Visits
         </h3>
         <span
-          class="badge"
-          style="
-            background: #f1f5f9;
-            color: #64748b;
-            font-size: 14px;
-            padding: 6px 12px;
-          "
+          class="extracted-inline-38 badge"
           id="completed-count"
           >0</span
         >
@@ -329,37 +185,26 @@
     <!-- QR Code Standee Modal for Staff -->
     <div id="qrModal" class="backdrop">
       <div
-        style="
-          background: white;
-          padding: 40px;
-          border-radius: 16px;
-          text-align: center;
-          max-width: 380px;
-        "
-      >
-        <h2 style="margin-bottom: 5px; color: var(--primary-color)">
+       class="extracted-inline-39">
+        <h2 class="extracted-inline-40">
           Clinic Check-In QR
         </h2>
         <p
-          style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px"
-        >
+         class="extracted-inline-41">
           Display at reception desk
         </p>
         <div
           id="dashboardQRCode"
-          style="display: flex; justify-content: center; margin-bottom: 25px"
-        ></div>
+         class="extracted-inline-42"></div>
         <button
           onclick="printQRCode()"
-          class="btn btn-primary btn-block"
-          style="background-color: var(--success-color)"
+          class="extracted-inline-43 btn btn-primary btn-block"
         >
           Print Check-In Poster
         </button>
         <button
           onclick="document.getElementById('qrModal').style.display = 'none'"
-          class="btn btn-ghost btn-block"
-          style="margin-top: 10px"
+          class="extracted-inline-44 btn btn-ghost btn-block"
         >
           Close
         </button>
@@ -369,66 +214,32 @@
     <!-- PRINT LAYOUT 3: Printable QR Code Standee Layout -->
     <div id="print-qr-layout" class="print-only">
       <div
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          margin-bottom: 12px;
-        "
-      >
+       class="extracted-inline-45">
         <img
           src="/assets/logo/tap2med_logo.png"
-          style="width: 50px; height: 40px; object-fit: contain"
           onerror="this.style.display = 'none'"
-        />
+         class="extracted-inline-46"/>
         <span
-          style="
-            font-size: 32px;
-            font-weight: 800;
-            color: #0284c7;
-            font-family: &quot;Inter&quot;, sans-serif;
-          "
-          >Tap2Med</span
+           class="extracted-inline-47">Tap2Med</span
         >
       </div>
       <p
-        style="
-          font-size: 18px;
-          color: #64748b;
-          margin-top: 0;
-          margin-bottom: 20px;
-          font-weight: 600;
-        "
-      >
+       class="extracted-inline-48">
         Clinic Check-In
       </p>
       <h1
-        style="
-          font-size: 34px;
-          font-weight: 800;
-          color: #0f172a;
-          margin-bottom: 30px;
-        "
-      >
+       class="extracted-inline-49">
         Scan to Check-In
       </h1>
       <div
         id="print-qr-target"
-        style="display: flex; justify-content: center; margin-bottom: 30px"
-      ></div>
+       class="extracted-inline-50"></div>
       <h2
         id="print-qr-clinic-name"
-        style="
-          font-size: 28px;
-          font-weight: 800;
-          color: #0284c7;
-          margin-bottom: 8px;
-        "
-      >
+       class="extracted-inline-51">
         Clinic Name
       </h2>
-      <p style="font-size: 15px; color: #64748b; font-weight: 500">
+      <p class="extracted-inline-52">
         Powered by Tap2Med
       </p>
     </div>
