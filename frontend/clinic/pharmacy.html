@@ -15,11 +15,11 @@
    .rx-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary-color); }
    .rx-card.packed { border-color: #e2e8f0; opacity: 0.6; box-shadow: none; background: #f8fafc; }
    .rx-card.packed::before { background: #cbd5e1; }
-   .rx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed #cbd5e1; }
+   .rx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed #cbd5e1; flex-wrap: wrap; gap: 16px; }
    .token-badge { font-size: 36px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.03em; line-height: 1; }
    .packed .token-badge { color: #64748b; }
    .med-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-   .med-item { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: background 0.2s; }
+   .med-item { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: background 0.2s; gap: 12px; }
    .rx-card:not(.packed) .med-item:hover { background: white; border-color: #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
    .med-name { font-size: 18px; font-weight: 700; color: var(--text-main); }
    .med-instructions { font-size: 15px; color: var(--text-muted); font-weight: 600; font-style: italic; }
@@ -28,10 +28,41 @@
    .brand-text { font-size: 22px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.02em; }
    .brand-divider { width: 2px; height: 24px; background: #e2e8f0; margin: 0 8px; }
    .brand-role { font-size: 15px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+   /* ---- Live stock panel ---- */
+   .stock-panel { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 24px; margin-bottom: 32px; }
+   .stock-panel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+   .stock-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+   .stock-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
+   .stock-row.out { background: #fef2f2; border-color: #fecaca; }
+   .stock-name { flex: 1; font-weight: 700; font-size: 14px; color: var(--text-main); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+   .stock-qty { width: 64px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; font-weight: 700; text-align: center; }
+   .stock-btn { min-width: 84px; font-weight: 700; border-radius: 8px; cursor: pointer; border: 1px solid transparent; padding: 6px 10px; font-size: 13px; }
+   .stock-btn.zero { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+   .stock-btn.restock { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+
+   /* ---- Stock chips and actions on prescription cards ---- */
+   .stock-chip { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
+   .stock-chip.in { background: #dcfce7; color: #166534; }
+   .stock-chip.out { background: #fee2e2; color: #991b1b; }
+   .med-right { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+   .oos-banner { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-weight: 600; font-size: 14px; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; }
+   .rx-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+   .uhi-btn { background: white; color: #7c3aed; border: 2px solid #c4b5fd; font-weight: 700; border-radius: 10px; padding: 8px 16px; cursor: pointer; }
+   .uhi-btn.hot { background: #7c3aed; color: white; border-color: #7c3aed; }
+   .done-tag { font-weight: 800; font-size: 15px; padding: 8px 16px; border-radius: 10px; }
+   .done-tag.done { background: #dcfce7; color: #166534; }
+   .done-tag.routed { background: #ede9fe; color: #6d28d9; }
+
+   /* ---- Toast ---- */
+   .toast-msg { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
+   .toast-msg.error { background: #991b1b; }
+
+   @media (max-width: 700px) { .stock-grid { grid-template-columns: 1fr; } }
   </style>
  </head>
  <body style="background: #f1f5f9;">
-  
+
   <header class="top-header" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); padding: 16px 32px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50;">
    <div class="brand-header">
     <img src="/assets/logo/tap2med_logo.png" alt="Tap2Med" class="brand-logo" />
@@ -40,12 +71,21 @@
     <span class="brand-role">Pharmacy</span>
    </div>
    <div style="display: flex; gap: 16px;">
-     <button onclick="clearPacked()" class="btn btn-secondary btn-sm" style="background: white;">Clear Packed History</button>
      <button onclick="logout()" class="btn btn-ghost btn-sm" style="font-weight: 600;">Log Out</button>
    </div>
   </header>
 
   <main class="pharmacy-grid">
+   <section class="stock-panel">
+    <div class="stock-panel-head">
+     <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--text-main);">Live Stock</h2>
+     <span style="color: var(--text-muted); font-weight: 500; font-size: 14px;">Set a medicine to 0 and the doctor's screen shows it as out of stock within seconds.</span>
+    </div>
+    <div id="stock-grid" class="stock-grid">
+     <p style="color: var(--text-muted); font-weight: 500;">Loading stock...</p>
+    </div>
+   </section>
+
    <div style="margin-bottom: 30px;">
     <h2 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text-main);">Live Prescription Feed</h2>
     <p style="margin: 8px 0 0; color: var(--text-muted); font-weight: 500;">Prescriptions sync instantly when the doctor saves them.</p>
@@ -59,6 +99,24 @@
    const clinicId = localStorage.getItem("tap2med_clinic_id");
    if (!clinicId) window.location.href = "/staff-login";
 
+   const API = `/api/clinics/pharmacy/${encodeURIComponent(clinicId)}`;
+   const TYPE_PREFIX = /^(TAB|CAP|SYP|INJ|OINT|GEL|CRM|DROPS|SUSP|INH|RESP|POW|LOT|SACH)\.?\s*/i;
+   const DEFAULT_RESTOCK = 50;
+   const LAST_QTY_KEY = "tap2med_stock_last_qty";
+
+   let stockList = [];
+   let feedData = [];
+   let lastState = null;
+
+   function esc(value) {
+     return String(value == null ? "" : value)
+       .replace(/&/g, "&amp;")
+       .replace(/</g, "&lt;")
+       .replace(/>/g, "&gt;")
+       .replace(/"/g, "&quot;")
+       .replace(/'/g, "&#39;");
+   }
+
    function logout() {
      localStorage.removeItem("tap2med_clinic_id");
      localStorage.removeItem("tap2med_staff_role");
@@ -66,104 +124,266 @@
    }
 
    function getShortCode(tokenNumber) {
-     const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ"; 
-     const letter = letters[(tokenNumber - 1) % 24]; 
-     return `${letter}-${tokenNumber}`; 
+     const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+     const letter = letters[(tokenNumber - 1) % 24];
+     return `${letter}-${tokenNumber}`;
    }
 
-   function togglePackedStatus(localToken) {
-     let packedTokens = JSON.parse(localStorage.getItem("tap2med_packed_rx") || "[]");
-     if (packedTokens.includes(localToken)) {
-       packedTokens = packedTokens.filter(t => t !== localToken);
-     } else {
-       packedTokens.push(localToken);
-     }
-     localStorage.setItem("tap2med_packed_rx", JSON.stringify(packedTokens));
-     
-     window.lastPharmacyDataString = null;
-     loadPharmacyFeed(); 
+   function toast(message, kind) {
+     const el = document.createElement("div");
+     el.className = "toast-msg" + (kind === "error" ? " error" : "");
+     el.textContent = message;
+     document.body.appendChild(el);
+     setTimeout(() => el.remove(), 3200);
    }
 
-   function clearPacked() {
-     if(confirm("Are you sure you want to clear the packed history? This is usually done at the end of the day.")) {
-       localStorage.setItem("tap2med_packed_rx", JSON.stringify([]));
-       window.lastPharmacyDataString = null;
-       loadPharmacyFeed();
-     }
+   /* ---------- Matching a prescribed medicine to the stock list ---------- */
+   function squash(text) {
+     return String(text || "").toLowerCase().replace(/\s+/g, "");
    }
 
-   async function loadPharmacyFeed() {
+   function findStock(medicineName) {
+     const typed = squash(String(medicineName || "").trim().replace(TYPE_PREFIX, ""));
+     if (typed.length < 2) return null;
+     const rows = stockList.map((r) => ({ ...r, key: squash(r.medicine_name) }));
+     return (
+       rows.find((r) => r.key === typed) ||
+       rows.find((r) => r.key.startsWith(typed)) ||
+       (typed.length >= 3 ? rows.find((r) => r.key.includes(typed)) : null) ||
+       (typed.length >= 4 ? rows.find((r) => r.key.length >= 4 && typed.includes(r.key)) : null) ||
+       null
+     );
+   }
+
+   /* ---------- Stock API calls ---------- */
+   async function setStock(name, quantity) {
      try {
-       const response = await fetch(`/api/clinics/pharmacy/${encodeURIComponent(clinicId)}`);
-       if (!response.ok) return;
-       
-       const data = await response.json();
-       let packedTokens = JSON.parse(localStorage.getItem("tap2med_packed_rx") || "[]");
-
-       const currentStateString = JSON.stringify(data.feed) + JSON.stringify(packedTokens);
-       if (window.lastPharmacyDataString === currentStateString) {
-         return; 
-       }
-       window.lastPharmacyDataString = currentStateString;
-       
-       const feedContainer = document.getElementById("rx-feed");
-       
-       if (!data.feed || data.feed.length === 0) {
-         feedContainer.innerHTML = '<div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1; color: #94a3b8; font-weight: 500; margin-top: 20px;">No prescriptions generated yet today.</div>';
-         return;
-       }
-
-       feedContainer.innerHTML = "";
-
-       data.feed.forEach((rx) => {
-         const shortCode = getShortCode(rx.token_number);
-         const isPacked = packedTokens.includes(rx.local_token);
-         const displayName = rx.patient_name || 'Patient';
-         const displayId = rx.display_id || '--';
-         
-         const card = document.createElement("div");
-         card.className = `rx-card ${isPacked ? 'packed' : ''}`;
-         
-         let medHtml = '<ul class="med-list">';
-         rx.medicines.forEach(m => {
-           medHtml += `
-             <li class="med-item">
-               <span class="med-name">${m.name}</span>
-               <span class="med-instructions">${m.instructions || ''}</span>
-             </li>
-           `;
-         });
-         medHtml += '</ul>';
-
-         card.innerHTML = `
-           <div class="rx-header">
-             <div style="display: flex; align-items: center; gap: 16px;">
-               <div class="token-badge">#${shortCode}</div>
-               <div>
-                 <strong style="font-size: 18px; color: var(--primary-color);">${displayName}</strong>
-                 <div style="font-size: 13px; color: var(--text-muted); font-weight: 600;">ID: ${displayId}</div>
-               </div>
-             </div>
-             <button onclick="togglePackedStatus('${rx.local_token}')" class="btn ${isPacked ? 'btn-secondary' : 'btn-primary'}" style="${isPacked ? 'background: white; border-color: #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.02);' : 'background: var(--success-color); box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); padding: 0 24px;'}">
-               ${isPacked ? 'Undo' : '✓ Mark as Packed'}
-             </button>
-           </div>
-           ${medHtml}
-         `;
-         
-         if (isPacked) {
-           feedContainer.appendChild(card);
-         } else {
-           feedContainer.insertBefore(card, feedContainer.firstChild);
-         }
+       const res = await fetch(`${API}/stock`, {
+         method: "PUT",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ medicine_name: name, quantity }),
        });
-     } catch (error) {
-       console.error("Pharmacy feed error:", error);
+       if (!res.ok) throw new Error("bad status");
+       return true;
+     } catch (err) {
+       toast("Could not update stock. Is the server running?", "error");
+       return false;
      }
    }
 
-   loadPharmacyFeed();
-   setInterval(loadPharmacyFeed, 5000);
+   async function toggleStock(name) {
+     const row = stockList.find((r) => r.medicine_name === name);
+     if (!row) return;
+     const lastQty = JSON.parse(localStorage.getItem(LAST_QTY_KEY) || "{}");
+
+     if (row.quantity > 0) {
+       lastQty[name] = row.quantity;
+       localStorage.setItem(LAST_QTY_KEY, JSON.stringify(lastQty));
+       if (await setStock(name, 0)) toast(`${name} set to 0 (stockout)`);
+     } else {
+       const restoreTo = lastQty[name] || DEFAULT_RESTOCK;
+       if (await setStock(name, restoreTo)) toast(`${name} restocked to ${restoreTo}`);
+     }
+     await refresh(true);
+   }
+
+   async function changeQuantity(name, rawValue) {
+     const quantity = parseInt(rawValue, 10);
+     if (!Number.isNaN(quantity) && quantity >= 0) {
+       await setStock(name, quantity);
+     }
+     await refresh(true);
+   }
+
+   /* ---------- Dispense / UHI routing ---------- */
+   // "routed_epharmacy" is logged in the same table Ity's credit score reads.
+   // When her /pharmacy/route-epharmacy endpoint is ready, call it here as well.
+   async function sendDispense(localToken, status) {
+     try {
+       const res = await fetch(`${API}/dispense`, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ local_token: localToken, status }),
+       });
+       if (!res.ok) {
+         let detail = "";
+         try { detail = (await res.json()).detail; } catch (e) {}
+         toast(detail || "Could not update this prescription", "error");
+         return false;
+       }
+       return true;
+     } catch (err) {
+       toast("Could not reach the server", "error");
+       return false;
+     }
+   }
+
+   /* ---------- Rendering ---------- */
+   function renderStock() {
+     const grid = document.getElementById("stock-grid");
+     // Do not rebuild the panel while the pharmacist is typing a number.
+     if (grid.contains(document.activeElement) && document.activeElement.tagName === "INPUT") {
+       return false;
+     }
+
+     if (!stockList.length) {
+       grid.innerHTML = '<p style="color: var(--text-muted); font-weight: 500;">No stock list for this clinic yet. Run the seed script.</p>';
+       return true;
+     }
+
+     grid.innerHTML = stockList
+       .map((r) => {
+         const out = r.quantity === 0;
+         return `
+           <div class="stock-row ${out ? "out" : ""}">
+             <div class="stock-name" title="${esc(r.medicine_name)}">${esc(r.medicine_name)}</div>
+             <input type="number" min="0" class="stock-qty" value="${r.quantity}" data-qty="${esc(r.medicine_name)}" />
+             <button type="button" class="stock-btn ${out ? "restock" : "zero"}" data-toggle="${esc(r.medicine_name)}">${out ? "Restock" : "Set to 0"}</button>
+           </div>`;
+       })
+       .join("");
+     return true;
+   }
+
+   function renderFeed() {
+     const feedContainer = document.getElementById("rx-feed");
+
+     if (!feedData.length) {
+       feedContainer.innerHTML = '<div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1; color: #94a3b8; font-weight: 500; font-size: 16px;">No prescriptions generated yet today.</div>';
+       return;
+     }
+
+     feedContainer.innerHTML = "";
+
+     feedData.forEach((rx) => {
+       const status = rx.dispense_status;
+       const done = status === "dispensed" || status === "routed_epharmacy";
+       const shortCode = getShortCode(rx.token_number);
+       const displayName = rx.patient_name || "Patient";
+       const displayId = rx.display_id || "--";
+
+       const outOfStock = [];
+       let medHtml = '<ul class="med-list">';
+       rx.medicines.forEach((m) => {
+         let chip = "";
+         if (!done) {
+           const s = findStock(m.name);
+           if (s && s.quantity > 0) {
+             chip = `<span class="stock-chip in">In stock (${s.quantity})</span>`;
+           } else if (s) {
+             chip = '<span class="stock-chip out">Out of stock</span>';
+             outOfStock.push(m.name);
+           }
+         }
+         medHtml += `
+           <li class="med-item">
+             <span class="med-name">${esc(m.name)}</span>
+             <span class="med-right">
+               ${chip}
+               <span class="med-instructions">${esc(m.instructions || "")}</span>
+             </span>
+           </li>`;
+       });
+       medHtml += "</ul>";
+
+       const hasOut = outOfStock.length > 0;
+       const banner = hasOut
+         ? `<div class="oos-banner">⚠ Out of stock locally: ${esc(outOfStock.join(", "))}. Route this order to UHI E-Pharmacy.</div>`
+         : "";
+
+       let actionsHtml;
+       if (status === "dispensed") {
+         actionsHtml = '<span class="done-tag done">✓ Dispensed</span>';
+       } else if (status === "routed_epharmacy") {
+         actionsHtml = '<span class="done-tag routed">⚡ Routed to UHI E-Pharmacy</span>';
+       } else {
+         actionsHtml = `
+           <div class="rx-actions">
+             <button type="button" class="btn ${hasOut ? "btn-secondary" : "btn-primary"}" style="${hasOut ? "background: white;" : ""}" data-dispense="${esc(rx.local_token)}">✓ Mark Dispensed</button>
+             <button type="button" class="uhi-btn ${hasOut ? "hot" : ""}" data-route="${esc(rx.local_token)}">⚡ Route to UHI E-Pharmacy</button>
+           </div>`;
+       }
+
+       const card = document.createElement("div");
+       card.className = `rx-card ${done ? "packed" : ""}`;
+       card.innerHTML = `
+         <div class="rx-header">
+           <div style="display: flex; align-items: center; gap: 16px;">
+             <div class="token-badge">#${esc(shortCode)}</div>
+             <div>
+               <strong style="font-size: 18px; color: var(--primary-color);">${esc(displayName)}</strong>
+               <div style="font-size: 13px; color: var(--text-muted); font-weight: 600;">ID: ${esc(displayId)}</div>
+             </div>
+           </div>
+           ${actionsHtml}
+         </div>
+         ${banner}
+         ${medHtml}
+       `;
+
+       if (done) {
+         feedContainer.appendChild(card);
+       } else {
+         feedContainer.insertBefore(card, feedContainer.firstChild);
+       }
+     });
+   }
+
+   /* ---------- Loading ---------- */
+   async function refresh(force) {
+     try {
+       const [feedRes, stockRes] = await Promise.all([fetch(API), fetch(`${API}/stock`)]);
+       if (stockRes.ok) stockList = (await stockRes.json()).stock || [];
+       if (feedRes.ok) feedData = (await feedRes.json()).feed || [];
+
+       const state = JSON.stringify(feedData) + JSON.stringify(stockList);
+       if (!force && state === lastState) return;
+       lastState = state;
+
+       const stockRendered = renderStock();
+       renderFeed();
+       if (!stockRendered) lastState = null; // try the stock panel again next tick
+     } catch (error) {
+       console.error("Pharmacy refresh error:", error);
+     }
+   }
+
+   /* ---------- Clicks ---------- */
+   document.addEventListener("click", async (event) => {
+     const toggleBtn = event.target.closest("[data-toggle]");
+     if (toggleBtn) {
+       toggleBtn.disabled = true;
+       await toggleStock(toggleBtn.dataset.toggle);
+       return;
+     }
+
+     const dispenseBtn = event.target.closest("[data-dispense]");
+     if (dispenseBtn) {
+       dispenseBtn.disabled = true;
+       if (await sendDispense(dispenseBtn.dataset.dispense, "dispensed")) {
+         toast("Marked as dispensed");
+       }
+       await refresh(true);
+       return;
+     }
+
+     const routeBtn = event.target.closest("[data-route]");
+     if (routeBtn) {
+       routeBtn.disabled = true;
+       if (await sendDispense(routeBtn.dataset.route, "routed_epharmacy")) {
+         toast("Order routed to UHI E-Pharmacy (sandbox simulation)");
+       }
+       await refresh(true);
+     }
+   });
+
+   document.addEventListener("change", (event) => {
+     const qtyInput = event.target.closest("[data-qty]");
+     if (qtyInput) changeQuantity(qtyInput.dataset.qty, qtyInput.value);
+   });
+
+   refresh(true);
+   setInterval(() => refresh(false), 3000);
   </script>
  </body>
 </html>

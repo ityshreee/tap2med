@@ -1,4 +1,4 @@
-from sqlalchemy import DateTime, ForeignKey, Column, String, Text, Integer, Boolean
+from sqlalchemy import DateTime, ForeignKey, Column, String, Text, Integer, Boolean, UniqueConstraint
 from sqlalchemy.orm import DeclarativeMeta, relationship
 from app.db.database import Base
 from sqlalchemy.sql import func
@@ -153,3 +153,47 @@ class CrossClinicConsent(Base):
 
     clinic = relationship("Clinic")
     event = relationship("Event")
+    
+class PharmacyStock(Base):
+    """One row per medicine per clinic. Pharmacist edits quantity live."""
+    __tablename__ = "pharmacy_stock"
+    __table_args__ = (
+        UniqueConstraint("clinic_id", "medicine_key", name="uq_pharmacy_stock_clinic_medicine"),
+    )
+
+    stock_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    clinic_id = Column(UUID(as_uuid=True), ForeignKey("clinics.clinic_id"), nullable=False, index=True)
+
+    medicine_name = Column(Text, nullable=False)              # shown on screen
+    medicine_key = Column(Text, nullable=False, index=True)   # lowercase, used for matching
+    quantity = Column(Integer, nullable=False, default=0)
+    substitute_name = Column(Text, nullable=True)             # suggested alternative
+
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class PharmacyDispense(Base):
+    """One row per visit (event) once the pharmacist has handled it."""
+    __tablename__ = "pharmacy_dispenses"
+
+    dispense_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    clinic_id = Column(UUID(as_uuid=True), ForeignKey("clinics.clinic_id"), nullable=False, index=True)
+    event_id = Column(UUID(as_uuid=True), ForeignKey("events.event_id"), nullable=False, unique=True)
+    local_token = Column(Text, nullable=False, index=True)
+
+    # "dispensed" = given from local stock, "routed_epharmacy" = sent to UHI E-Pharmacy
+    status = Column(Text, nullable=False, default="dispensed")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PrescriptionSubstitution(Base):
+    """Log of every 1-click substitution the doctor made."""
+    __tablename__ = "prescription_substitutions"
+
+    substitution_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    clinic_id = Column(UUID(as_uuid=True), ForeignKey("clinics.clinic_id"), nullable=False, index=True)
+    local_token = Column(Text, nullable=False, index=True)
+
+    original_medicine = Column(Text, nullable=False)
+    substitute_medicine = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
