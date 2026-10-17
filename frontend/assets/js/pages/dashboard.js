@@ -1894,3 +1894,159 @@ window.checkRange = function (input) {
 
 loadQueue();
 setInterval(loadQueue, 5000);
+// ===============================================================
+// INLINE STOCK TELEMETRY + 1-CLICK SUBSTITUTE  (Person 3)
+// Paste this whole block at the VERY BOTTOM of
+// frontend/assets/js/pages/dashboard.js
+// It uses the existing globals: clinicId and currentLocalToken.
+// ===============================================================
+(function () {
+  const DEBOUNCE_MS = 350; // wait after typing stops before asking the server
+  const POLL_MS = 4000; // re-check every row so pharmacist changes show up live
+  const timers = new WeakMap();
+
+  function getLine(input) {
+    const cell = input.parentElement;
+    let line = cell.querySelector(".rx-stock-line");
+    if (!line) {
+      line = document.createElement("div");
+      line.className = "rx-stock-line";
+      line.style.cssText =
+        "display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:3px;font-size:10.5px;line-height:1.3;";
+      cell.appendChild(line);
+    }
+    return line;
+  }
+
+  function clearLine(input) {
+    const line = input.parentElement.querySelector(".rx-stock-line");
+    if (line) line.remove();
+  }
+
+  function renderStock(input, data) {
+    if (!data || data.status === "unknown") {
+      clearLine(input);
+      return;
+    }
+
+    const line = getLine(input);
+    line.textContent = "";
+
+    const badge = document.createElement("span");
+    badge.style.cssText =
+      "padding:1px 7px;border-radius:999px;font-weight:700;white-space:nowrap;";
+    if (data.status === "in_stock") {
+      badge.textContent = "● In Stock";
+      badge.style.background = "#dcfce7";
+      badge.style.color = "#166534";
+    } else {
+      badge.textContent = "● Out of Stock";
+      badge.style.background = "#fee2e2";
+      badge.style.color = "#991b1b";
+    }
+    line.appendChild(badge);
+
+    if (data.status === "out_of_stock") {
+      if (data.substitute) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "⇄ Use " + data.substitute;
+        btn.title = "Replace with " + data.substitute + " (in stock)";
+        btn.style.cssText =
+          "background:#16a34a;color:#fff;border:0;border-radius:6px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer;";
+        btn.addEventListener("click", () => applySubstitute(input, data));
+        line.appendChild(btn);
+      } else {
+        const none = document.createElement("span");
+        none.textContent = "No substitute in stock";
+        none.style.color = "#64748b";
+        line.appendChild(none);
+      }
+    } else if (
+      input.dataset.replacedFrom &&
+      input.value.trim() === input.dataset.replacedTo
+    ) {
+      const note = document.createElement("span");
+      note.textContent = "replaced " + input.dataset.replacedFrom;
+      note.style.color = "#64748b";
+      line.appendChild(note);
+    }
+  }
+
+  async function checkStock(input) {
+    const name = input.value.trim();
+    if (name.length < 2) {
+      clearLine(input);
+      return;
+    }
+
+    const seq = (Number(input.dataset.stockSeq) || 0) + 1;
+    input.dataset.stockSeq = String(seq);
+
+    try {
+      const res = await fetch(
+        `/api/clinics/pharmacy/${encodeURIComponent(clinicId)}/check-stock?medicine=${encodeURIComponent(name)}`,
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+
+      // Ignore old answers: a newer check started, the row was removed,
+      // or the doctor kept typing.
+      if (Number(input.dataset.stockSeq) !== seq) return;
+      if (!input.isConnected) return;
+      if (input.value.trim() !== name) return;
+
+      renderStock(input, data);
+    } catch (err) {
+      // Server unreachable: leave the current badge as it is.
+    }
+  }
+
+  async function applySubstitute(input, data) {
+    input.dataset.replacedFrom = data.medicine;
+    input.dataset.replacedTo = data.substitute;
+    input.value = data.substitute;
+
+    // Fires the existing handlers (updateFreq, draft save) and re-checks stock.
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+
+    // Record the swap. Needs an active patient; the swap itself works either way.
+    if (currentLocalToken) {
+      try {
+        await fetch(
+          `/api/clinics/pharmacy/${encodeURIComponent(clinicId)}/substitution`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              local_token: currentLocalToken,
+              original_medicine: data.medicine,
+              substitute_medicine: data.substitute,
+            }),
+          },
+        );
+      } catch (err) {
+        // Not critical for the demo; the doctor's screen already updated.
+      }
+    }
+  }
+
+  // One listener handles every row, including rows added later.
+  document.addEventListener("input", (event) => {
+    const input = event.target;
+    if (!input.classList || !input.classList.contains("rx-med")) return;
+    clearTimeout(timers.get(input));
+    timers.set(
+      input,
+      setTimeout(() => checkStock(input), DEBOUNCE_MS),
+    );
+  });
+
+  // Live refresh: pharmacist sets stock to 0 -> doctor's badge flips within seconds.
+  setInterval(() => {
+    if (document.hidden) return;
+    document.querySelectorAll("#rx-container .rx-med").forEach((input) => {
+      if (input.value.trim().length >= 2) checkStock(input);
+    });
+  }, POLL_MS);
+})();

@@ -216,6 +216,10 @@ def get_pharmacy_feed(clinic_id: uuid.UUID, db: Session = Depends(get_db)):
         }
 
         feed = []
+        dispense_map = {
+            d.event_id: d.status
+            for d in db.query(models.PharmacyDispense).filter(models.PharmacyDispense.clinic_id == clinic_id).all()
+        }
         for event in completed_events:
             rx_list = db.query(models.Prescription).filter(
                 models.Prescription.event_id == event.event_id,
@@ -232,7 +236,8 @@ def get_pharmacy_feed(clinic_id: uuid.UUID, db: Session = Depends(get_db)):
                     "token_number": event.daily_token_number,
                     "display_id": display_id,
                     "patient_name": patient_name,
-                    "medicines": [{"name": rx.medicine_name, "instructions": rx.instructions} for rx in rx_list]
+                    "medicines": [{"name": rx.medicine_name, "instructions": rx.instructions} for rx in rx_list],
+                    "dispense_status": dispense_map.get(event.event_id)
                 })
 
         return {"status": "success", "feed": feed}
@@ -353,3 +358,209 @@ def get_preferences(clinic_id: uuid.UUID, db: Session = Depends(get_db)):
         return {"appointment_fee": "", "walkin_fee": "", "followup_fee": "", "followup_days": "", "qualifications": "", "address": "", "extra_notes": "", "save_patient_phone": False, "print_header": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+# ===============================================================
+# PHARMACY STOCK / DISPENSE / SUBSTITUTION ENDPOINTS  (Person 3)
+# Paste this whole block at the BOTTOM of app/api/clinics.py
+# (no new imports needed: uuid, func, BaseModel, models, IST,
+#  HTTPException, Depends, Session, datetime are already imported there)
+# ===============================================================
+
+
+def _norm_key(text_value: str) -> str:
+    """Lowercase + single spaces. Same rule the seed script uses."""
+    return " ".join((text_value or "").lower().split())
+
+
+def _find_stock_row(db: Session, clinic_id: uuid.UUID, medicine: str):
+    """
+    Match what the doctor typed against this clinic's stock list.
+    Spaces are ignored, so 'paracetamol500mg' matches 'Paracetamol 500mg'.
+    Order: exact match, then starts-with, then contains (3+ letters only).
+    """
+    typed = _norm_key(medicine).replace(" ", "")
+    if len(typed) < 2:
+        return None
+
+    no_space = func.replace(models.PharmacyStock.medicine_key, " ", "")
+    base = db.query(models.PharmacyStock).filter(models.PharmacyStock.clinic_id == clinic_id)
+
+    row = base.filter(no_space == typed).first()
+    if row:
+        return row
+
+    row = base.filter(no_space.startswith(typed, autoescape=True)).order_by(
+        func.length(models.PharmacyStock.medicine_key)
+    ).first()
+    if row:
+        return row
+
+    if len(typed) >= 3:
+        row = base.filter(no_space.contains(typed, autoescape=True)).order_by(
+            func.length(models.PharmacyStock.medicine_key)
+        ).first()
+    return row
+
+
+@router.get("/pharmacy/{clinic_id}/check-stock")
+def check_stock(clinic_id: uuid.UUID, medicine: str, db: Session = Depends(get_db)):
+    """
+    Used by the doctor's prescription pad while typing a medicine.
+    status is one of: "in_stock", "out_of_stock", "unknown".
+    A substitute is only suggested if the substitute itself is in stock.
+    """
+    row = _find_stock_row(db, clinic_id, medicine)
+    if not row:
+        return {"status": "unknown", "medicine": medicine, "quantity": None, "substitute": None}
+
+    if row.quantity > 0:
+        return {
+            "status": "in_stock",
+            "medicine": row.medicine_name,
+            "quantity": row.quantity,
+            "substitute": None,
+        }
+
+    substitute = None
+    if row.substitute_name:
+        sub_row = _find_stock_row(db, clinic_id, row.substitute_name)
+        if sub_row and sub_row.quantity > 0:
+            substitute = sub_row.medicine_name
+
+    return {
+        "status": "out_of_stock",
+        "medicine": row.medicine_name,
+        "quantity": 0,
+        "substitute": substitute,
+    }
+
+
+@router.get("/pharmacy/{clinic_id}/stock")
+def get_stock_list(clinic_id: uuid.UUID, db: Session = Depends(get_db)):
+    """Full stock list for the pharmacist's page."""
+    rows = (
+        db.query(models.PharmacyStock)
+        .filter(models.PharmacyStock.clinic_id == clinic_id)
+        .order_by(models.PharmacyStock.medicine_name)
+        .all()
+    )
+    return {
+        "status": "success",
+        "stock": [
+            {
+                "medicine_name": r.medicine_name,
+                "quantity": r.quantity,
+                "substitute": r.substitute_name,
+            }
+            for r in rows
+        ],
+    }
+
+
+class StockUpdate(BaseModel):
+    medicine_name: str
+    quantity: int
+
+
+@router.put("/pharmacy/{clinic_id}/stock")
+def set_stock(clinic_id: uuid.UUID, payload: StockUpdate, db: Session = Depends(get_db)):
+    """Pharmacist sets a medicine's quantity (e.g. to 0 to fake a stockout)."""
+    if payload.quantity < 0:
+        raise HTTPException(status_code=400, detail="Quantity cannot be negative")
+
+    key = _norm_key(payload.medicine_name)
+    if not key:
+        raise HTTPException(status_code=400, detail="Medicine name is required")
+
+    row = (
+        db.query(models.PharmacyStock)
+        .filter(
+            models.PharmacyStock.clinic_id == clinic_id,
+            models.PharmacyStock.medicine_key == key,
+        )
+        .first()
+    )
+    if row:
+        row.quantity = payload.quantity
+    else:
+        row = models.PharmacyStock(
+            clinic_id=clinic_id,
+            medicine_name=payload.medicine_name.strip(),
+            medicine_key=key,
+            quantity=payload.quantity,
+        )
+        db.add(row)
+
+    db.commit()
+    return {"status": "success", "medicine_name": row.medicine_name, "quantity": row.quantity}
+
+
+class DispensePayload(BaseModel):
+    local_token: str
+    # "dispensed" = handed over from local stock, "routed_epharmacy" = sent to UHI E-Pharmacy
+    status: str = "dispensed"
+
+
+@router.post("/pharmacy/{clinic_id}/dispense")
+def mark_dispensed(clinic_id: uuid.UUID, payload: DispensePayload, db: Session = Depends(get_db)):
+    """Pharmacist clicks 'Mark Dispensed' for today's completed visit of this patient."""
+    if payload.status not in ("dispensed", "routed_epharmacy"):
+        raise HTTPException(status_code=400, detail="Invalid status")
+
+    now_ist = datetime.now(IST)
+    today_start = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = now_ist.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    event = (
+        db.query(models.Event)
+        .filter(
+            models.Event.clinic_id == clinic_id,
+            models.Event.local_token == payload.local_token,
+            models.Event.status == "completed",
+            models.Event.timestamp >= today_start,
+            models.Event.timestamp <= today_end,
+        )
+        .order_by(models.Event.timestamp.desc())
+        .first()
+    )
+    if not event:
+        raise HTTPException(status_code=404, detail="No completed visit found for this patient today")
+
+    record = (
+        db.query(models.PharmacyDispense)
+        .filter(models.PharmacyDispense.event_id == event.event_id)
+        .first()
+    )
+    if record:
+        record.status = payload.status
+    else:
+        record = models.PharmacyDispense(
+            clinic_id=clinic_id,
+            event_id=event.event_id,
+            local_token=payload.local_token,
+            status=payload.status,
+        )
+        db.add(record)
+
+    db.commit()
+    return {"status": "success", "dispense_status": record.status}
+
+
+class SubstitutionPayload(BaseModel):
+    local_token: str
+    original_medicine: str
+    substitute_medicine: str
+
+
+@router.post("/pharmacy/{clinic_id}/substitution")
+def record_substitution(clinic_id: uuid.UUID, payload: SubstitutionPayload, db: Session = Depends(get_db)):
+    """Doctor clicked the green substitute button: log the swap."""
+    db.add(
+        models.PrescriptionSubstitution(
+            clinic_id=clinic_id,
+            local_token=payload.local_token,
+            original_medicine=payload.original_medicine.strip(),
+            substitute_medicine=payload.substitute_medicine.strip(),
+        )
+    )
+    db.commit()
+    return {"status": "success"}
