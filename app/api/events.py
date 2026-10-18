@@ -432,7 +432,8 @@ def get_patient_status(local_token: str, clinic_id: uuid.UUID, db: Session = Dep
             
             return {
                 "status": "Completed",
-                "prescription_text": rx_text
+                "prescription_text": rx_text,
+                "medicines": [rx.medicine_name for rx in rx_list] if rx_list else []
             }
 
         ahead = db.query(models.Event).filter(

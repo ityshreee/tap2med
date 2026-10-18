@@ -76,7 +76,8 @@
     <div class="brand-divider"></div>
     <span class="brand-role">Pharmacy</span>
    </div>
-   <div style="display: flex; gap: 16px; align-items: center;">
+   <div style="display: flex; gap: 12px; align-items: center;">
+     <button id="sound-toggle-btn" type="button" onclick="togglePharmacySound()" class="btn btn-secondary btn-sm" style="font-weight: 600; display: flex; align-items: center; gap: 6px;">🔔 Audio Alert: ON</button>
      <button type="button" onclick="openInventoryModal()" class="btn btn-secondary btn-sm" style="font-weight: 600; display: flex; align-items: center; gap: 6px;">📦 Live Inventory</button>
      <button onclick="logout()" class="btn btn-ghost btn-sm" style="font-weight: 600;">Log Out</button>
    </div>
@@ -172,6 +173,73 @@
    let stockList = [];
    let feedData = [];
    let lastState = null;
+   let knownRxTokens = new Set();
+   let audioContext = null;
+   let soundEnabled = true;
+
+   function getAudioContext() {
+     if (!audioContext) {
+       const AudioCtx = window.AudioContext || window.webkitAudioContext;
+       if (AudioCtx) audioContext = new AudioCtx();
+     }
+     if (audioContext && audioContext.state === "suspended") {
+       audioContext.resume();
+     }
+     return audioContext;
+   }
+
+   function playNewPrescriptionChime() {
+     if (!soundEnabled) return;
+     try {
+       const ctx = getAudioContext();
+       if (!ctx) return;
+       const now = ctx.currentTime;
+
+       // Two-tone pleasant notification chime: C6 (1046Hz) -> G6 (1568Hz)
+       const osc1 = ctx.createOscillator();
+       const gain1 = ctx.createGain();
+       osc1.type = "sine";
+       osc1.frequency.setValueAtTime(1046.5, now);
+       gain1.gain.setValueAtTime(0.2, now);
+       gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+       osc1.connect(gain1);
+       gain1.connect(ctx.destination);
+       osc1.start(now);
+       osc1.stop(now + 0.28);
+
+       const osc2 = ctx.createOscillator();
+       const gain2 = ctx.createGain();
+       osc2.type = "sine";
+       osc2.frequency.setValueAtTime(1568.0, now + 0.12);
+       gain2.gain.setValueAtTime(0.25, now + 0.12);
+       gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+       osc2.connect(gain2);
+       gain2.connect(ctx.destination);
+       osc2.start(now + 0.12);
+       osc2.stop(now + 0.48);
+     } catch (err) {
+       console.warn("Audio chime error:", err);
+     }
+   }
+
+   function togglePharmacySound() {
+     soundEnabled = !soundEnabled;
+     const btn = document.getElementById("sound-toggle-btn");
+     if (btn) {
+       btn.innerHTML = soundEnabled ? "🔔 Audio Alert: ON" : "🔕 Audio Alert: OFF";
+       btn.style.color = soundEnabled ? "var(--text-main)" : "#94a3b8";
+     }
+     if (soundEnabled) {
+       playNewPrescriptionChime();
+       toast("Audio alerts enabled (played test chime)");
+     } else {
+       toast("Audio alerts muted");
+     }
+   }
+
+   document.addEventListener("click", () => {
+     getAudioContext();
+   }, { once: false });
 
    function esc(value) {
      return String(value == null ? "" : value)
@@ -521,7 +589,18 @@
          const countBadge = document.getElementById("stock-count-badge");
          if (countBadge) countBadge.textContent = `${stockList.length} items`;
        }
-       if (feedRes.ok) feedData = (await feedRes.json()).feed || [];
+       if (feedRes.ok) {
+         const newFeed = (await feedRes.json()).feed || [];
+         if (knownRxTokens.size > 0) {
+           const hasNew = newFeed.some((item) => !knownRxTokens.has(item.local_token));
+           if (hasNew) {
+             playNewPrescriptionChime();
+             toast("🔔 New prescription received!");
+           }
+         }
+         newFeed.forEach((item) => knownRxTokens.add(item.local_token));
+         feedData = newFeed;
+       }
 
        const state = JSON.stringify(feedData) + JSON.stringify(stockList);
        if (!force && state === lastState) return;

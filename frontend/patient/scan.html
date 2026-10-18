@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/assets/css/base.css" />
     <link rel="stylesheet" href="/assets/css/forms.css" />
     <link rel="stylesheet" href="/assets/css/buttons.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
       .auth-wrapper {
         min-height: 100vh;
@@ -26,9 +27,29 @@
         border-radius: 20px;
         box-shadow: 0 10px 25px rgba(9, 41, 66, 0.08);
         width: 100%;
-        max-width: 400px;
+        max-width: 440px;
         border: 1px solid var(--border-color);
         text-align: center;
+        transition: max-width 0.3s ease;
+      }
+      .pharmacy-card {
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        text-align: left;
+      }
+      .pharmacy-card:hover, .pharmacy-card.selected {
+        border-color: #0284c7;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15);
+        background: #f8fafc;
+      }
+      .pharmacy-card.selected {
+        border-width: 2px;
+        background: #f0f9ff;
       }
       .brand {
         display: inline-flex;
@@ -428,6 +449,7 @@
       </div>
     </main>
 
-    <script type="module" src="/assets/js/pages/scan.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="/assets/js/pages/scan.js?v=20261018_2"></script>
   </body>
 </html>
