@@ -19,13 +19,14 @@
    .pharmacy-tab-btn:hover:not(.active) { background: #f8fafc; border-color: #94a3b8; }
 
    /* ---- Prescription Cards ---- */
-   .rx-card { background: var(--surface-color); border: 2px solid var(--primary-color); border-radius: 16px; margin-bottom: 24px; padding: 32px; box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.15); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
-   .rx-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary-color); }
-   .rx-card.packed { border-color: #e2e8f0; opacity: 0.75; box-shadow: none; background: #f8fafc; }
-   .rx-card.packed::before { background: #16a34a; }
+   .rx-card { background: var(--surface-color); border: 1.5px solid #e2e8f0; border-left: 5px solid var(--primary-color); border-radius: 16px; margin-bottom: 24px; padding: 26px 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.04); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+   .rx-card:hover { box-shadow: 0 12px 24px -4px rgba(2, 132, 199, 0.12), 0 4px 6px -2px rgba(2, 132, 199, 0.04); transform: translateY(-2px); }
+   .rx-card.packed { border-color: #e2e8f0; border-left-color: #16a34a; opacity: 0.9; box-shadow: 0 1px 3px rgba(0,0,0,0.03); background: #fcfdfc; }
+   .rx-card.packed:hover { transform: none; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+   .rx-card.packed::before { display: none; }
    .rx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed #cbd5e1; flex-wrap: wrap; gap: 16px; }
-   .token-badge { font-size: 36px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.03em; line-height: 1; }
-   .packed .token-badge { color: #16a34a; }
+   .token-badge { font-size: 26px; font-weight: 800; color: var(--primary-color); background: #f0f9ff; border: 1.5px solid #bae6fd; padding: 6px 14px; border-radius: 10px; letter-spacing: -0.02em; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; }
+   .packed .token-badge { color: #16a34a; background: #f0fdf4; border-color: #bbf7d0; }
    .med-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
    .med-item { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: background 0.2s; gap: 12px; }
    .rx-card:not(.packed) .med-item:hover { background: white; border-color: #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -104,7 +105,11 @@
        </button>
      </div>
      <div id="rx-feed">
-       <p style="text-align: center; color: var(--text-muted); margin-top: 80px; font-weight: 500; font-size: 16px;">Waiting for prescriptions...</p>
+       <div style="text-align: center; padding: 64px 24px; background: white; border-radius: 16px; border: 1.5px dashed #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+         <div style="font-size: 40px; margin-bottom: 12px;">📋</div>
+         <strong style="font-size: 18px; color: #1e293b; display: block; margin-bottom: 6px;">All Caught Up!</strong>
+         <p style="color: #64748b; font-size: 14px; margin: 0 auto; max-width: 420px; line-height: 1.5;">Prescriptions sync and appear here in real time as soon as doctors complete consultations.</p>
+       </div>
      </div>
    </section>
 
@@ -345,7 +350,12 @@
      const filtered = stockList.filter((item) => !searchTerm || item.medicine_name.toLowerCase().includes(searchTerm));
 
      if (!filtered.length) {
-       const emptyHtml = `<div style="text-align: center; padding: 40px; color: #94a3b8; font-weight: 500;">${searchTerm ? 'No medicines matching "' + esc(searchTerm) + '"' : 'No medicines in inventory yet. Use the form above to add medicines.'}</div>`;
+       const emptyHtml = `
+         <div style="text-align: center; padding: 56px 20px; background: white; border-radius: 12px; border: 1.5px dashed #cbd5e1;">
+           <div style="font-size: 38px; margin-bottom: 10px;">📦</div>
+           <strong style="font-size: 16px; color: #1e293b; display: block; margin-bottom: 4px;">${searchTerm ? 'No medicines matching "' + esc(searchTerm) + '"' : 'No medicines in inventory yet.'}</strong>
+           <p style="color: #64748b; font-size: 13.5px; margin: 0 auto; max-width: 360px;">${searchTerm ? 'Try a different search term or check spelling.' : 'Use the form above to add medicines to this clinic stock.'}</p>
+         </div>`;
        container.innerHTML = emptyHtml;
        const modalTarget = document.getElementById("modal-inventory-content");
        if (modalTarget) modalTarget.innerHTML = emptyHtml;
@@ -415,7 +425,12 @@
      const feedContainer = document.getElementById("rx-feed");
 
      if (!feedData.length) {
-       feedContainer.innerHTML = '<div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #cbd5e1; color: #94a3b8; font-weight: 500; font-size: 16px;">No prescriptions generated yet today.</div>';
+       feedContainer.innerHTML = `
+         <div style="text-align: center; padding: 64px 24px; background: white; border-radius: 16px; border: 1.5px dashed #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+           <div style="font-size: 40px; margin-bottom: 12px;">📋</div>
+           <strong style="font-size: 18px; color: #1e293b; display: block; margin-bottom: 6px;">All Caught Up!</strong>
+           <p style="color: #64748b; font-size: 14px; margin: 0 auto; max-width: 420px; line-height: 1.5;">Prescriptions sync and appear here in real time as soon as doctors complete consultations.</p>
+         </div>`;
        return;
      }
 
