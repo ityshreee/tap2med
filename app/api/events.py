@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 import uuid
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
@@ -38,15 +38,34 @@ def check_rate_limit(request: Request):
         
     rate_limit_records[client_ip].append(current_time)
 
+def _clean_uuid(v):
+    if isinstance(v, uuid.UUID):
+        return v
+    if isinstance(v, str):
+        match = re.search(r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}', v)
+        if match:
+            return uuid.UUID(match.group(0))
+    return v
+
 class ScanRequest(BaseModel):
     phone: str
     member_id: int = 0
     clinic_id: uuid.UUID
 
+    @field_validator("clinic_id", mode="before")
+    @classmethod
+    def parse_clinic_id(cls, v):
+        return _clean_uuid(v)
+
 class LookupRequest(BaseModel):
     phone: str
     member_id: int = 0
     clinic_id: uuid.UUID
+
+    @field_validator("clinic_id", mode="before")
+    @classmethod
+    def parse_clinic_id(cls, v):
+        return _clean_uuid(v)
 
 class MedicineItem(BaseModel):
     name: str
@@ -64,6 +83,11 @@ class CompleteRequest(BaseModel):
     advice: Optional[str] = None
     follow_up_days: Optional[int] = 3
 
+    @field_validator("clinic_id", mode="before")
+    @classmethod
+    def parse_clinic_id(cls, v):
+        return _clean_uuid(v)
+
 
 class StartVisitRequest(BaseModel):
     phone: str
@@ -74,6 +98,11 @@ class StartVisitRequest(BaseModel):
     age: Optional[int] = None
     is_appointment: bool = False
     share_network_history: Optional[bool] = False
+
+    @field_validator("clinic_id", mode="before")
+    @classmethod
+    def parse_clinic_id(cls, v):
+        return _clean_uuid(v)
 
 
 class CityUpdate(BaseModel):

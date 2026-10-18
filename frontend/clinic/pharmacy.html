@@ -3,21 +3,29 @@
  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pharmacy Feed | Tap2Med</title>
+  <title>Pharmacy Feed & Inventory | Tap2Med</title>
   <link rel="stylesheet" href="/assets/css/variables.css" />
   <link rel="stylesheet" href="/assets/css/base.css" />
   <link rel="stylesheet" href="/assets/css/layout.css" />
   <link rel="stylesheet" href="/assets/css/components.css" />
   <link rel="stylesheet" href="/assets/css/buttons.css" />
   <style>
-   .pharmacy-grid { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+   .pharmacy-grid { max-width: 950px; margin: 30px auto; padding: 0 20px; }
+   
+   /* ---- Tabs ---- */
+   .pharmacy-tabs { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; align-items: center; }
+   .pharmacy-tab-btn { padding: 10px 22px; font-weight: 700; font-size: 15px; border-radius: 10px; border: 1px solid #cbd5e1; cursor: pointer; background: white; color: var(--text-main); transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+   .pharmacy-tab-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25); }
+   .pharmacy-tab-btn:hover:not(.active) { background: #f8fafc; border-color: #94a3b8; }
+
+   /* ---- Prescription Cards ---- */
    .rx-card { background: var(--surface-color); border: 2px solid var(--primary-color); border-radius: 16px; margin-bottom: 24px; padding: 32px; box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.15); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
    .rx-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary-color); }
-   .rx-card.packed { border-color: #e2e8f0; opacity: 0.6; box-shadow: none; background: #f8fafc; }
-   .rx-card.packed::before { background: #cbd5e1; }
+   .rx-card.packed { border-color: #e2e8f0; opacity: 0.75; box-shadow: none; background: #f8fafc; }
+   .rx-card.packed::before { background: #16a34a; }
    .rx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed #cbd5e1; flex-wrap: wrap; gap: 16px; }
    .token-badge { font-size: 36px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.03em; line-height: 1; }
-   .packed .token-badge { color: #64748b; }
+   .packed .token-badge { color: #16a34a; }
    .med-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
    .med-item { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: background 0.2s; gap: 12px; }
    .rx-card:not(.packed) .med-item:hover { background: white; border-color: #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -29,36 +37,33 @@
    .brand-divider { width: 2px; height: 24px; background: #e2e8f0; margin: 0 8px; }
    .brand-role { font-size: 15px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
-   /* ---- Live stock panel ---- */
-   .stock-panel { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 24px; margin-bottom: 32px; }
-   .stock-panel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
-   .stock-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-   .stock-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
-   .stock-row.out { background: #fef2f2; border-color: #fecaca; }
-   .stock-name { flex: 1; font-weight: 700; font-size: 14px; color: var(--text-main); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-   .stock-qty { width: 64px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; font-weight: 700; text-align: center; }
-   .stock-btn { min-width: 84px; font-weight: 700; border-radius: 8px; cursor: pointer; border: 1px solid transparent; padding: 6px 10px; font-size: 13px; }
-   .stock-btn.zero { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
-   .stock-btn.restock { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
-
-   /* ---- Stock chips and actions on prescription cards ---- */
+   /* ---- Stock chips & tags ---- */
    .stock-chip { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
    .stock-chip.in { background: #dcfce7; color: #166534; }
    .stock-chip.out { background: #fee2e2; color: #991b1b; }
    .med-right { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
    .oos-banner { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-weight: 600; font-size: 14px; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; }
-   .rx-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-   .uhi-btn { background: white; color: #7c3aed; border: 2px solid #c4b5fd; font-weight: 700; border-radius: 10px; padding: 8px 16px; cursor: pointer; }
+   .rx-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+   .uhi-btn { background: white; color: #7c3aed; border: 2px solid #c4b5fd; font-weight: 700; border-radius: 10px; padding: 8px 16px; cursor: pointer; transition: all 0.2s; }
    .uhi-btn.hot { background: #7c3aed; color: white; border-color: #7c3aed; }
-   .done-tag { font-weight: 800; font-size: 15px; padding: 8px 16px; border-radius: 10px; }
-   .done-tag.done { background: #dcfce7; color: #166534; }
-   .done-tag.routed { background: #ede9fe; color: #6d28d9; }
+   .done-tag { font-weight: 800; font-size: 14px; padding: 8px 16px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; }
+   .done-tag.done { background: #dcfce7; color: #166534; border: 1.5px solid #86efac; }
+   .done-tag.routed { background: #ede9fe; color: #6d28d9; border: 1.5px solid #ddd6fe; }
+
+   /* ---- Stock Buttons in Inventory ---- */
+   .stock-btn { font-weight: 700; border-radius: 8px; cursor: pointer; border: 1px solid transparent; padding: 6px 10px; font-size: 12px; }
+   .stock-btn.zero { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+   .stock-btn.restock { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
 
    /* ---- Toast ---- */
-   .toast-msg { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
+   .toast-msg { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
    .toast-msg.error { background: #991b1b; }
 
-   @media (max-width: 700px) { .stock-grid { grid-template-columns: 1fr; } }
+   /* ---- Modal ---- */
+   .inventory-modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
+   .inventory-modal { background: white; border-radius: 16px; width: 100%; max-width: 900px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+   .inventory-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e2e8f0; }
+   .inventory-modal-body { padding: 24px; overflow-y: auto; flex: 1; }
   </style>
  </head>
  <body style="background: #f1f5f9;">
@@ -70,30 +75,85 @@
     <div class="brand-divider"></div>
     <span class="brand-role">Pharmacy</span>
    </div>
-   <div style="display: flex; gap: 16px;">
+   <div style="display: flex; gap: 16px; align-items: center;">
+     <button type="button" onclick="openInventoryModal()" class="btn btn-secondary btn-sm" style="font-weight: 600; display: flex; align-items: center; gap: 6px;">📦 Live Inventory</button>
      <button onclick="logout()" class="btn btn-ghost btn-sm" style="font-weight: 600;">Log Out</button>
    </div>
   </header>
 
   <main class="pharmacy-grid">
-   <section class="stock-panel">
-    <div class="stock-panel-head">
-     <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--text-main);">Live Stock</h2>
-     <span style="color: var(--text-muted); font-weight: 500; font-size: 14px;">Set a medicine to 0 and the doctor's screen shows it as out of stock within seconds.</span>
-    </div>
-    <div id="stock-grid" class="stock-grid">
-     <p style="color: var(--text-muted); font-weight: 500;">Loading stock...</p>
-    </div>
+   <!-- Navigation Tabs -->
+   <div class="pharmacy-tabs">
+     <button id="tab-btn-prescriptions" class="pharmacy-tab-btn active" onclick="switchPharmacyTab('prescriptions')">
+       📋 Active Prescriptions
+     </button>
+     <button id="tab-btn-inventory" class="pharmacy-tab-btn" onclick="switchPharmacyTab('inventory')">
+       📦 Live Inventory Manager
+     </button>
+   </div>
+
+   <!-- Tab Panel 1: Prescriptions Feed -->
+   <section id="panel-prescriptions">
+     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+       <div>
+         <h2 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text-main);">Live Prescription Feed</h2>
+         <p style="margin: 6px 0 0; color: var(--text-muted); font-weight: 500;">Prescriptions sync instantly when the doctor completes a visit.</p>
+       </div>
+       <button type="button" onclick="switchPharmacyTab('inventory')" class="btn btn-secondary" style="font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+         📦 Manage Inventory (<span id="stock-count-badge">--</span>)
+       </button>
+     </div>
+     <div id="rx-feed">
+       <p style="text-align: center; color: var(--text-muted); margin-top: 80px; font-weight: 500; font-size: 16px;">Waiting for prescriptions...</p>
+     </div>
    </section>
 
-   <div style="margin-bottom: 30px;">
-    <h2 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text-main);">Live Prescription Feed</h2>
-    <p style="margin: 8px 0 0; color: var(--text-muted); font-weight: 500;">Prescriptions sync instantly when the doctor saves them.</p>
-   </div>
-   <div id="rx-feed">
-    <p style="text-align: center; color: var(--text-muted); margin-top: 80px; font-weight: 500; font-size: 16px;">Waiting for prescriptions...</p>
-   </div>
+   <!-- Tab Panel 2: Live Inventory Manager -->
+   <section id="panel-inventory" style="display: none;">
+     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-bottom: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+         <div>
+           <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: var(--text-main);">Live Inventory Manager</h2>
+           <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 14px;">Edit stock quantities in real time. Changes propagate instantly to doctor prescription pad.</p>
+         </div>
+         <button type="button" onclick="refreshStockList(true)" class="btn btn-secondary" style="font-size: 13px; font-weight: 600;">🔄 Refresh Stock</button>
+       </div>
+
+       <!-- Search & Add Form -->
+       <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+         <input type="text" id="inventory-search-input" placeholder="🔍 Search medicines by name..." oninput="filterInventory()" style="flex: 1; min-width: 240px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;" />
+       </div>
+
+       <!-- Quick Add / Update Custom Medicine Form -->
+       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+         <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 8px;">➕ Update or Add Medicine Stock</strong>
+         <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+           <input type="text" id="add-med-name" placeholder="Medicine Name (e.g. Paracetamol 500mg)" style="flex: 2; min-width: 200px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;" />
+           <input type="number" min="0" id="add-med-qty" placeholder="Qty" value="50" style="width: 90px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;" />
+           <button type="button" onclick="submitCustomStock()" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px; font-weight: 700;">Save Stock</button>
+         </div>
+       </div>
+
+       <!-- Stock Table / Grid -->
+       <div id="inventory-table-container">
+         <p style="color: var(--text-muted);">Loading inventory...</p>
+       </div>
+     </div>
+   </section>
   </main>
+
+  <!-- Live Inventory Manager Modal -->
+  <div id="inventory-modal" class="inventory-modal-backdrop" onclick="if(event.target === this) closeInventoryModal()">
+    <div class="inventory-modal">
+      <div class="inventory-modal-header">
+        <h3 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--primary-color);">📦 Live Inventory Manager</h3>
+        <button type="button" onclick="closeInventoryModal()" style="border: none; background: none; font-size: 24px; cursor: pointer; color: #94a3b8;">&times;</button>
+      </div>
+      <div class="inventory-modal-body">
+        <div id="modal-inventory-content"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
    const clinicId = localStorage.getItem("tap2med_clinic_id");
@@ -137,6 +197,40 @@
      setTimeout(() => el.remove(), 3200);
    }
 
+   function switchPharmacyTab(tabName) {
+     const prescriptionsPanel = document.getElementById("panel-prescriptions");
+     const inventoryPanel = document.getElementById("panel-inventory");
+     const prescriptionsBtn = document.getElementById("tab-btn-prescriptions");
+     const inventoryBtn = document.getElementById("tab-btn-inventory");
+
+     if (tabName === "inventory") {
+       prescriptionsPanel.style.display = "none";
+       inventoryPanel.style.display = "block";
+       prescriptionsBtn.classList.remove("active");
+       inventoryBtn.classList.add("active");
+       refreshStockList(false);
+     } else {
+       inventoryPanel.style.display = "none";
+       prescriptionsPanel.style.display = "block";
+       inventoryBtn.classList.remove("active");
+       prescriptionsBtn.classList.add("active");
+       refresh(true);
+     }
+   }
+
+   function openInventoryModal() {
+     document.getElementById("inventory-modal").style.display = "flex";
+     renderStockTable();
+   }
+
+   function closeInventoryModal() {
+     document.getElementById("inventory-modal").style.display = "none";
+   }
+
+   function filterInventory() {
+     renderStockTable();
+   }
+
    /* ---------- Matching a prescribed medicine to the stock list ---------- */
    function squash(text) {
      return String(text || "").toLowerCase().replace(/\s+/g, "");
@@ -156,14 +250,33 @@
    }
 
    /* ---------- Stock API calls ---------- */
+   async function refreshStockList(showToastNotification = false) {
+     try {
+       const res = await fetch(`${API}/stock`);
+       if (!res.ok) throw new Error("Failed to fetch stock");
+       const data = await res.json();
+       stockList = data.stock || [];
+       renderStockTable();
+       const countBadge = document.getElementById("stock-count-badge");
+       if (countBadge) countBadge.textContent = `${stockList.length} items`;
+       if (showToastNotification) toast("Inventory refreshed ✓");
+       return stockList;
+     } catch (err) {
+       console.error("Stock load error:", err);
+       toast("Failed to load inventory from server", "error");
+     }
+   }
+
    async function setStock(name, quantity) {
      try {
+       const qty = parseInt(quantity, 10);
        const res = await fetch(`${API}/stock`, {
          method: "PUT",
          headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({ medicine_name: name, quantity }),
+         body: JSON.stringify({ medicine_name: name, quantity: isNaN(qty) ? 0 : qty }),
        });
        if (!res.ok) throw new Error("bad status");
+       toast(`Stock updated: ${name} = ${isNaN(qty) ? 0 : qty}`);
        return true;
      } catch (err) {
        toast("Could not update stock. Is the server running?", "error");
@@ -171,80 +284,133 @@
      }
    }
 
-   async function toggleStock(name) {
-     const row = stockList.find((r) => r.medicine_name === name);
-     if (!row) return;
-     const lastQty = JSON.parse(localStorage.getItem(LAST_QTY_KEY) || "{}");
-
-     if (row.quantity > 0) {
-       lastQty[name] = row.quantity;
-       localStorage.setItem(LAST_QTY_KEY, JSON.stringify(lastQty));
-       if (await setStock(name, 0)) toast(`${name} set to 0 (stockout)`);
-     } else {
-       const restoreTo = lastQty[name] || DEFAULT_RESTOCK;
-       if (await setStock(name, restoreTo)) toast(`${name} restocked to ${restoreTo}`);
-     }
+   async function saveMedQty(name) {
+     const input = document.getElementById(`qty-input-${name}`);
+     const val = input ? parseInt(input.value, 10) : 0;
+     await setStock(name, isNaN(val) ? 0 : val);
      await refresh(true);
    }
 
-   async function changeQuantity(name, rawValue) {
-     const quantity = parseInt(rawValue, 10);
-     if (!Number.isNaN(quantity) && quantity >= 0) {
-       await setStock(name, quantity);
-     }
+   async function setMedZero(name) {
+     await setStock(name, 0);
+     await refresh(true);
+   }
+
+   async function restockMed(name, addQty = 50) {
+     const row = stockList.find((r) => r.medicine_name === name);
+     const current = row ? row.quantity : 0;
+     await setStock(name, current + addQty);
+     await refresh(true);
+   }
+
+   async function submitCustomStock() {
+     const nameInput = document.getElementById("add-med-name");
+     const qtyInput = document.getElementById("add-med-qty");
+     const name = (nameInput?.value || "").trim();
+     const qty = parseInt(qtyInput?.value || "0", 10);
+     if (!name) return alert("Please enter a medicine name");
+     await setStock(name, isNaN(qty) ? 0 : qty);
+     nameInput.value = "";
      await refresh(true);
    }
 
    /* ---------- Dispense / UHI routing ---------- */
-   // "routed_epharmacy" is logged in the same table Ity's credit score reads.
-   // When her /pharmacy/route-epharmacy endpoint is ready, call it here as well.
    async function sendDispense(localToken, status) {
      try {
        const res = await fetch(`${API}/dispense`, {
          method: "POST",
          headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({ local_token: localToken, status }),
+         body: JSON.stringify({ local_token: localToken, status: status || "dispensed" }),
        });
        if (!res.ok) {
          let detail = "";
          try { detail = (await res.json()).detail; } catch (e) {}
          toast(detail || "Could not update this prescription", "error");
-         return false;
+         return null;
        }
-       return true;
+       const data = await res.json();
+       return data;
      } catch (err) {
        toast("Could not reach the server", "error");
-       return false;
+       return null;
      }
    }
 
-   /* ---------- Rendering ---------- */
-   function renderStock() {
-     const grid = document.getElementById("stock-grid");
-     // Do not rebuild the panel while the pharmacist is typing a number.
-     if (grid.contains(document.activeElement) && document.activeElement.tagName === "INPUT") {
-       return false;
+   /* ---------- Rendering Inventory Manager ---------- */
+   function renderStockTable() {
+     const container = document.getElementById("inventory-table-container");
+     if (!container) return;
+
+     const searchTerm = (document.getElementById("inventory-search-input")?.value || "").toLowerCase().trim();
+     const filtered = stockList.filter((item) => !searchTerm || item.medicine_name.toLowerCase().includes(searchTerm));
+
+     if (!filtered.length) {
+       const emptyHtml = `<div style="text-align: center; padding: 40px; color: #94a3b8; font-weight: 500;">${searchTerm ? 'No medicines matching "' + esc(searchTerm) + '"' : 'No medicines in inventory yet. Use the form above to add medicines.'}</div>`;
+       container.innerHTML = emptyHtml;
+       const modalTarget = document.getElementById("modal-inventory-content");
+       if (modalTarget) modalTarget.innerHTML = emptyHtml;
+       return;
      }
 
-     if (!stockList.length) {
-       grid.innerHTML = '<p style="color: var(--text-muted); font-weight: 500;">No stock list for this clinic yet. Run the seed script.</p>';
-       return true;
-     }
+     let html = `
+       <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 12px;">
+         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+           <thead>
+             <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+               <th style="padding: 12px 16px; font-weight: 700; color: #475569;">Medicine Name</th>
+               <th style="padding: 12px 16px; font-weight: 700; color: #475569;">Substitute</th>
+               <th style="padding: 12px 16px; font-weight: 700; color: #475569;">Status</th>
+               <th style="padding: 12px 16px; font-weight: 700; color: #475569; width: 120px;">Quantity</th>
+               <th style="padding: 12px 16px; font-weight: 700; color: #475569; text-align: right;">Actions</th>
+             </tr>
+           </thead>
+           <tbody>
+     `;
 
-     grid.innerHTML = stockList
-       .map((r) => {
-         const out = r.quantity === 0;
-         return `
-           <div class="stock-row ${out ? "out" : ""}">
-             <div class="stock-name" title="${esc(r.medicine_name)}">${esc(r.medicine_name)}</div>
-             <input type="number" min="0" class="stock-qty" value="${r.quantity}" data-qty="${esc(r.medicine_name)}" />
-             <button type="button" class="stock-btn ${out ? "restock" : "zero"}" data-toggle="${esc(r.medicine_name)}">${out ? "Restock" : "Set to 0"}</button>
-           </div>`;
-       })
-       .join("");
-     return true;
+     filtered.forEach((r) => {
+       const out = r.quantity === 0;
+       html += `
+         <tr style="border-bottom: 1px solid #f1f5f9; background: ${out ? '#fff7ed' : '#ffffff'};">
+           <td style="padding: 12px 16px; font-weight: 700; color: var(--text-main);">
+             ${esc(r.medicine_name)}
+           </td>
+           <td style="padding: 12px 16px; color: #64748b; font-size: 13px;">
+             ${r.substitute ? `<span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-weight: 600;">⇄ ${esc(r.substitute)}</span>` : '<span style="color: #cbd5e1;">None</span>'}
+           </td>
+           <td style="padding: 12px 16px;">
+             <span class="stock-chip ${out ? 'out' : 'in'}" style="font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px;">
+               ${out ? 'Out of Stock' : `In Stock (${r.quantity})`}
+             </span>
+           </td>
+           <td style="padding: 12px 16px;">
+             <input type="number" min="0" class="stock-qty" id="qty-input-${esc(r.medicine_name)}" value="${r.quantity}" data-qty="${esc(r.medicine_name)}" style="width: 80px; padding: 6px 8px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-weight: 700; font-size: 14px;" />
+           </td>
+           <td style="padding: 12px 16px; text-align: right;">
+             <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
+               <button type="button" class="btn btn-sm btn-primary" onclick="saveMedQty('${esc(r.medicine_name)}')" style="padding: 5px 12px; font-size: 12px; font-weight: 700;">Save</button>
+               <button type="button" class="stock-btn zero" onclick="setMedZero('${esc(r.medicine_name)}')" style="padding: 5px 10px; font-size: 12px; font-weight: 700;">Set 0</button>
+               <button type="button" class="stock-btn restock" onclick="restockMed('${esc(r.medicine_name)}', 50)" style="padding: 5px 10px; font-size: 12px; font-weight: 700;">+50</button>
+             </div>
+           </td>
+         </tr>
+       `;
+     });
+
+     html += `
+           </tbody>
+         </table>
+       </div>
+     `;
+
+     container.innerHTML = html;
+
+     const modalTarget = document.getElementById("modal-inventory-content");
+     if (modalTarget) {
+       modalTarget.innerHTML = html;
+     }
    }
 
+   /* ---------- Rendering Prescriptions Feed ---------- */
    function renderFeed() {
      const feedContainer = document.getElementById("rx-feed");
 
@@ -257,7 +423,9 @@
 
      feedData.forEach((rx) => {
        const status = rx.dispense_status;
-       const done = status === "dispensed" || status === "routed_epharmacy";
+       const isDispensed = status === "dispensed";
+       const isRouted = status === "routed_epharmacy";
+       const done = isDispensed || isRouted;
        const shortCode = getShortCode(rx.token_number);
        const displayName = rx.patient_name || "Patient";
        const displayId = rx.display_id || "--";
@@ -287,19 +455,19 @@
        medHtml += "</ul>";
 
        const hasOut = outOfStock.length > 0;
-       const banner = hasOut
+       const banner = hasOut && !done
          ? `<div class="oos-banner">⚠ Out of stock locally: ${esc(outOfStock.join(", "))}. Route this order to UHI E-Pharmacy.</div>`
          : "";
 
        let actionsHtml;
-       if (status === "dispensed") {
-         actionsHtml = '<span class="done-tag done">✓ Dispensed</span>';
-       } else if (status === "routed_epharmacy") {
-         actionsHtml = '<span class="done-tag routed">⚡ Routed to UHI E-Pharmacy</span>';
+       if (isDispensed) {
+         actionsHtml = '<span class="done-tag done" style="background: #dcfce7; color: #166534; font-weight: 700; padding: 6px 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; border: 1.5px solid #86efac;">Dispensed ✓</span>';
+       } else if (isRouted) {
+         actionsHtml = '<span class="done-tag routed" style="background: #ede9fe; color: #6d28d9; font-weight: 700; padding: 6px 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; border: 1.5px solid #ddd6fe;">⚡ Routed to UHI E-Pharmacy</span>';
        } else {
          actionsHtml = `
            <div class="rx-actions">
-             <button type="button" class="btn ${hasOut ? "btn-secondary" : "btn-primary"}" style="${hasOut ? "background: white;" : ""}" data-dispense="${esc(rx.local_token)}">✓ Mark Dispensed</button>
+             <button type="button" class="btn btn-primary dispense-btn" style="background: #16a34a; border: 1px solid #16a34a; color: white; font-weight: 700; padding: 8px 18px; border-radius: 8px; cursor: pointer;" data-dispense="${esc(rx.local_token)}">Dispense ✓</button>
              <button type="button" class="uhi-btn ${hasOut ? "hot" : ""}" data-route="${esc(rx.local_token)}">⚡ Route to UHI E-Pharmacy</button>
            </div>`;
        }
@@ -329,39 +497,43 @@
      });
    }
 
-   /* ---------- Loading ---------- */
+   /* ---------- Main Poll / Refresh ---------- */
    async function refresh(force) {
      try {
        const [feedRes, stockRes] = await Promise.all([fetch(API), fetch(`${API}/stock`)]);
-       if (stockRes.ok) stockList = (await stockRes.json()).stock || [];
+       if (stockRes.ok) {
+         stockList = (await stockRes.json()).stock || [];
+         const countBadge = document.getElementById("stock-count-badge");
+         if (countBadge) countBadge.textContent = `${stockList.length} items`;
+       }
        if (feedRes.ok) feedData = (await feedRes.json()).feed || [];
 
        const state = JSON.stringify(feedData) + JSON.stringify(stockList);
        if (!force && state === lastState) return;
        lastState = state;
 
-       const stockRendered = renderStock();
+       renderStockTable();
        renderFeed();
-       if (!stockRendered) lastState = null; // try the stock panel again next tick
      } catch (error) {
        console.error("Pharmacy refresh error:", error);
      }
    }
 
-   /* ---------- Clicks ---------- */
+   /* ---------- Global Click & Change Handlers ---------- */
    document.addEventListener("click", async (event) => {
-     const toggleBtn = event.target.closest("[data-toggle]");
-     if (toggleBtn) {
-       toggleBtn.disabled = true;
-       await toggleStock(toggleBtn.dataset.toggle);
-       return;
-     }
-
      const dispenseBtn = event.target.closest("[data-dispense]");
      if (dispenseBtn) {
        dispenseBtn.disabled = true;
-       if (await sendDispense(dispenseBtn.dataset.dispense, "dispensed")) {
-         toast("Marked as dispensed");
+       dispenseBtn.textContent = "Dispensing...";
+       const token = dispenseBtn.dataset.dispense;
+       const res = await sendDispense(token, "dispensed");
+       if (res && res.dispense_status === "dispensed") {
+         toast("Prescription marked as Dispensed ✓");
+         const rxItem = feedData.find((item) => item.local_token === token);
+         if (rxItem) {
+           rxItem.dispense_status = "dispensed";
+           renderFeed();
+         }
        }
        await refresh(true);
        return;
@@ -370,16 +542,29 @@
      const routeBtn = event.target.closest("[data-route]");
      if (routeBtn) {
        routeBtn.disabled = true;
-       if (await sendDispense(routeBtn.dataset.route, "routed_epharmacy")) {
+       routeBtn.textContent = "Routing...";
+       const token = routeBtn.dataset.route;
+       const res = await sendDispense(token, "routed_epharmacy");
+       if (res && res.dispense_status === "routed_epharmacy") {
          toast("Order routed to UHI E-Pharmacy (sandbox simulation)");
+         const rxItem = feedData.find((item) => item.local_token === token);
+         if (rxItem) {
+           rxItem.dispense_status = "routed_epharmacy";
+           renderFeed();
+         }
        }
        await refresh(true);
      }
    });
 
-   document.addEventListener("change", (event) => {
+   document.addEventListener("change", async (event) => {
      const qtyInput = event.target.closest("[data-qty]");
-     if (qtyInput) changeQuantity(qtyInput.dataset.qty, qtyInput.value);
+     if (qtyInput) {
+       const medName = qtyInput.dataset.qty;
+       const val = parseInt(qtyInput.value, 10);
+       await setStock(medName, isNaN(val) ? 0 : val);
+       await refresh(true);
+     }
    });
 
    refresh(true);

@@ -1,10 +1,22 @@
+function extractCleanUUID(val) {
+  if (!val) return null;
+  const match = String(val).match(
+    /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/,
+  );
+  return match ? match[0] : String(val).trim();
+}
+
 const urlParams = new URLSearchParams(window.location.search);
-const scannedClinicId = urlParams.get("clinic");
+const rawScannedClinicId = urlParams.get("clinic");
+const scannedClinicId = extractCleanUUID(rawScannedClinicId);
 if (scannedClinicId) {
   localStorage.setItem("tap2med_patient_clinic_id", scannedClinicId);
 }
-const clinicId =
-  scannedClinicId || localStorage.getItem("tap2med_patient_clinic_id");
+const rawStoredClinicId = localStorage.getItem("tap2med_patient_clinic_id");
+const clinicId = scannedClinicId || extractCleanUUID(rawStoredClinicId);
+if (clinicId && clinicId !== rawStoredClinicId) {
+  localStorage.setItem("tap2med_patient_clinic_id", clinicId);
+}
 
 let currentSessionPhone = localStorage.getItem("tap2med_last_phone") || null;
 
@@ -43,7 +55,7 @@ function showScreen(screenId) {
 // ----------------- WIZARD NAVIGATION -----------------
 
 document.getElementById("btn-phone-next")?.addEventListener("click", () => {
-  if (!scannedClinicId) {
+  if (!clinicId) {
     alert(
       "Invalid QR Code. Missing Clinic ID. Please scan the official clinic QR.",
     );
@@ -123,14 +135,14 @@ async function loadSelectedMember() {
       body: JSON.stringify({
         phone: currentSessionPhone,
         member_id: selectedMemberId,
-        clinic_id: scannedClinicId,
+        clinic_id: clinicId,
       }),
     });
     if (response.ok) {
       const data = await response.json();
       if (data.found) {
         if (nameInput) nameInput.value = data.patient_name || "";
-        if (cityInput) cityInput.value = data.city || "";
+        if (cityInput) cityInput.value = data.city || ""; 
         if (ageInput)
           ageInput.value =
             data.age !== undefined && data.age !== null ? String(data.age) : "";
@@ -217,7 +229,7 @@ document.getElementById("check-in-btn")?.addEventListener("click", async () => {
   const payload = {
     phone: currentSessionPhone,
     member_id: selectedMemberId,
-    clinic_id: scannedClinicId || clinicId,
+    clinic_id: clinicId,
     name: patientName,
     city: cityInput ? cityInput.value.trim() : null,
     age: patientAge ? parseInt(patientAge, 10) : null,
