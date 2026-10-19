@@ -378,3 +378,4 @@ def update_patient_consent_status(
         active_consents_count=active_count,
         last_updated=now
     )
+
