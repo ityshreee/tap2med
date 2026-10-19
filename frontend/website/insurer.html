@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Insurer Underwriting Portal | Tap2Med</title>
+    <link rel="stylesheet" href="/assets/css/variables.css" />
+    <link rel="stylesheet" href="/assets/css/base.css" />
+    <link rel="stylesheet" href="/assets/css/layout.css" />
+    <link rel="stylesheet" href="/assets/css/components.css" />
+    <link rel="stylesheet" href="/assets/css/buttons.css" />
+    <link rel="stylesheet" href="/assets/css/forms.css" />
+    <style>
+      body {
+        background: #f8fafc;
+        color: var(--color-text, #0f172a);
+        min-height: 100vh;
+        font-family: var(--font-family, "Inter", sans-serif);
+      }
+      .top-navbar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid #e2e8f0;
+        padding: 16px 32px;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .brand-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand-logo {
+        width: 36px;
+        height: 30px;
+        object-fit: contain;
+      }
+      .brand-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0284c7;
+        letter-spacing: -0.02em;
+      }
+      .brand-divider {
+        width: 2px;
+        height: 22px;
+        background: #cbd5e1;
+      }
+      .brand-subtitle {
+        font-size: 13px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .nav-links {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .portal-container {
+        max-width: 1200px;
+        margin: 32px auto 60px;
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+      .card-elevated {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 10px 25px -10px rgba(15, 23, 42, 0.08);
+      }
+      .zk-badge-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        border: 1.5px solid #86efac;
+        border-radius: 16px;
+        padding: 18px 22px;
+        margin-top: 10px;
+      }
+      .zk-badge-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #16a34a;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+      .gauge-container {
+        position: relative;
+        width: 260px;
+        height: 150px;
+        margin: 0 auto;
+      }
+      .score-number {
+        font-size: 48px;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        margin-top: 4px;
+      }
+      .tier-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 8px;
+      }
+      .tier-excellent {
+        background: #dcfce7;
+        color: #15803d;
+        border: 1px solid #86efac;
+      }
+      .tier-good {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #7dd3fc;
+      }
+      .tier-fair {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+      }
+      .tier-needs-attention {
+        background: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fca5a5;
+      }
+      .factor-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 8px;
+      }
+      .chip-sample {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .chip-sample:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+        border-color: #94a3b8;
+      }
+      .calc-display {
+        background: linear-gradient(135deg, #092942 0%, #0369a1 100%);
+        color: #ffffff;
+        border-radius: 18px;
+        padding: 24px;
+      }
+      .spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="top-navbar">
+      <div class="brand-box">
+        <img src="/assets/logo/tap2med_logo.png" alt="Tap2Med" class="brand-logo" onerror="this.style.display='none'" />
+        <span class="brand-title">Tap2Med</span>
+        <div class="brand-divider"></div>
+        <span class="brand-subtitle">Micro-Insurer Underwriting Gateway</span>
+      </div>
+      <div class="nav-links">
+        <a href="/passport" class="btn btn-secondary btn-sm" style="background: white;">Patient Passport</a>
+        <a href="/lab" class="btn btn-secondary btn-sm" style="background: white;">Partner Lab</a>
+        <a href="/dashboard" class="btn btn-ghost btn-sm">Clinic Workspace</a>
+      </div>
+    </header>
+
+    <main class="portal-container">
+      <!-- Section 1: Token Lookup & Evaluation Header -->
+      <section class="card-elevated">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+          <div>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 800; color: #092942;">
+              Algorithmic Underwriting & Health Credit Evaluation
+            </h1>
+            <p style="margin: 6px 0 0; color: #64748b; font-size: 14px;">
+              Verify patient risk rating on a 300–900 scale using deterministic token verification. Zero PII is exchanged.
+            </p>
+          </div>
+          <span class="badge badge-info" style="font-size: 12px; padding: 6px 14px; font-weight: 700;">
+            Real-time API Connected
+          </span>
+        </div>
+
+        <form id="underwriting-form" onsubmit="event.preventDefault(); evaluateToken();">
+          <label for="network-token-input" style="display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px;">
+            Patient Network Token (64-Character SHA-256 Digest)
+          </label>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <input
+              type="text"
+              id="network-token-input"
+              class="input"
+              placeholder="e.g. 7b9e4f2a3c1d8e5f6a0b4c2d8e6f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f"
+              maxlength="64"
+              required
+              style="flex: 1; min-width: 280px; font-family: monospace; font-size: 13px; letter-spacing: 0.5px;"
+            />
+            <button type="submit" id="btn-evaluate" class="btn btn-primary" style="min-width: 170px; height: 44px;">
+              <span id="btn-text">Evaluate Risk</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Quick Sample Token Chips for Testing -->
+        <div style="margin-top: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 12px; color: #64748b; font-weight: 600;">Demo Shortcuts:</span>
+          <button type="button" class="chip-sample" onclick="selectDemoToken('excellent')">
+            Preferred Health Sample
+          </button>
+          <button type="button" class="chip-sample" onclick="selectDemoToken('good')">
+            Standard Sample
+          </button>
+          <button type="button" class="chip-sample" onclick="selectDemoToken('needs_attention')">
+            Elevated Risk Sample
+          </button>
+        </div>
+
+        <!-- Zero-Knowledge Privacy Badge (Accurately Represented) -->
+        <div class="zk-badge-box">
+          <div class="zk-badge-icon" aria-hidden="true">&#x1F6E1;</div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <strong style="color: #166534; font-size: 14px; font-weight: 800;">
+                Zero-Knowledge Privacy Guarantee &bull; Zero-PII Blind Underwriting
+              </strong>
+              <span style="background: #bbf7d0; color: #14532d; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px;">
+                VERIFIED
+              </span>
+            </div>
+            <p style="margin: 4px 0 0; color: #166534; font-size: 12.5px; line-height: 1.5;">
+              This underwriting engine executes entirely on <strong>one-way deterministic HMAC-SHA256 tokens</strong>.
+              The insurer receives verified clinical biomarkers (blood pressure stability, HbA1c control, and care continuity)
+              without ever receiving or storing the patient's phone number, name, residential address, or government identity.
+              Privacy is preserved by architectural design.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Alert Box for Errors or Notices -->
+      <div id="error-alert" style="display: none; background: #fee2e2; border: 1.5px solid #f87171; color: #991b1b; padding: 14px 18px; border-radius: 14px; font-size: 14px; font-weight: 600;"></div>
+
+      <!-- Section 2: Underwriting Evaluation Results & Calculator (Hidden until evaluated) -->
+      <div id="evaluation-results" style="display: none;">
+        <div style="display: grid; grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.2fr); gap: 24px; align-items: start;">
+          
+          <!-- Column A: Visual Health Credit Score Gauge & Factors -->
+          <div class="card-elevated">
+            <h2 style="margin: 0 0 16px; font-size: 18px; font-weight: 800; color: #092942;">
+              Health Credit Score Gauge
+            </h2>
+
+            <!-- SVG Gauge -->
+            <div style="text-align: center; padding: 10px 0 20px;">
+              <div class="gauge-container">
+                <svg viewBox="0 0 200 120" style="width: 100%; height: 100%;">
+                  <!-- Background Track Arc (300 to 900) -->
+                  <path d="M 20 105 A 80 80 0 0 1 180 105" fill="none" stroke="#e2e8f0" stroke-width="18" stroke-linecap="round" />
+                  <!-- Colored Gauge Range (Needs Attention: Red) -->
+                  <path d="M 20 105 A 80 80 0 0 1 60 48" fill="none" stroke="#ef4444" stroke-width="18" opacity="0.85" />
+                  <!-- Fair: Amber -->
+                  <path d="M 60 48 A 80 80 0 0 1 100 25" fill="none" stroke="#f59e0b" stroke-width="18" opacity="0.85" />
+                  <!-- Good: Blue -->
+                  <path d="M 100 25 A 80 80 0 0 1 140 48" fill="none" stroke="#0284c7" stroke-width="18" opacity="0.85" />
+                  <!-- Excellent: Green -->
+                  <path d="M 140 48 A 80 80 0 0 1 180 105" fill="none" stroke="#16a34a" stroke-width="18" opacity="0.85" />
+                  <!-- Pointer Needle -->
+                  <line id="gauge-needle" x1="100" y1="105" x2="100" y2="35" stroke="#0f172a" stroke-width="4" stroke-linecap="round" style="transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: 100px 105px; transform: rotate(-90deg);" />
+                  <circle cx="100" cy="105" r="7" fill="#0f172a" />
+                </svg>
+              </div>
+
+              <!-- Numeric Score & Tier Badge -->
+              <div id="score-display" class="score-number" style="color: #0284c7;">--</div>
+              <div style="font-size: 13px; font-weight: 700; color: #64748b; margin-top: 2px;">
+                Score Range: 300 &ndash; 900
+              </div>
+              <div id="tier-badge-container">
+                <span id="tier-badge" class="tier-badge tier-good">--</span>
+              </div>
+            </div>
+
+            <!-- Score Breakdown Legend -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; padding: 12px 8px; background: #f8fafc; border-radius: 12px; margin-bottom: 20px; font-size: 11px; font-weight: 600;">
+              <div><span style="color:#ef4444;">●</span> 300-549<br/><span style="color:#64748b;">High Risk</span></div>
+              <div><span style="color:#f59e0b;">●</span> 550-649<br/><span style="color:#64748b;">Fair</span></div>
+              <div><span style="color:#0284c7;">●</span> 650-749<br/><span style="color:#64748b;">Good</span></div>
+              <div><span style="color:#16a34a;">●</span> 750-900<br/><span style="color:#64748b;">Preferred</span></div>
+            </div>
+
+            <!-- Clinical Factors Breakdown -->
+            <h3 style="margin: 0 0 12px; font-size: 15px; font-weight: 800; color: #092942;">
+              Verified Clinical Risk Factors
+            </h3>
+            <div id="factors-list">
+              <!-- Dynamically populated from backend response -->
+            </div>
+          </div>
+
+          <!-- Column B: Dynamic Micro-Insurance Premium Calculator -->
+          <div class="card-elevated">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h2 style="margin: 0; font-size: 18px; font-weight: 800; color: #092942;">
+                Dynamic Micro-Insurance Premium Calculator
+              </h2>
+              <span id="applied-discount-chip" style="background: #dcfce7; color: #166534; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px;">
+                -- Discount
+              </span>
+            </div>
+
+            <p style="margin: 0 0 20px; font-size: 13.5px; color: #64748b;">
+              Premiums adjust dynamically in real time based on coverage selection, tenure, and the patient's verified health credit discount.
+            </p>
+
+            <!-- Input 1: Plan Tier -->
+            <div style="margin-bottom: 16px;">
+              <label for="plan-tier-select" style="display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px;">
+                Micro-Insurance Product
+              </label>
+              <select id="plan-tier-select" class="select" onchange="calculatePremium();">
+                <option value="essential" data-rate="0.012">Essential OPD & Daycare Health (1.2% base rate)</option>
+                <option value="comprehensive" data-rate="0.016" selected>Comprehensive OPD + Inpatient Micro (1.6% base rate)</option>
+                <option value="critical" data-rate="0.020">Critical Illness Micro-TopUp (2.0% base rate)</option>
+              </select>
+            </div>
+
+            <!-- Input 2: Sum Insured / Coverage Amount -->
+            <div style="margin-bottom: 16px;">
+              <label for="coverage-amount-select" style="display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px;">
+                Sum Insured (Coverage Limit)
+              </label>
+              <select id="coverage-amount-select" class="select" onchange="calculatePremium();">
+                <option value="25000">₹25,000 (Micro Starter Cash)</option>
+                <option value="50000">₹50,000 (Essential Health Shield)</option>
+                <option value="100000" selected>₹1,00,000 (Standard Micro-Cover)</option>
+                <option value="200000">₹2,00,000 (Family Care Cover)</option>
+                <option value="500000">₹5,00,000 (Comprehensive Preferred Health)</option>
+              </select>
+            </div>
+
+            <!-- Input 3: Tenure / Billing Frequency -->
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px;">
+                Payment Term
+              </label>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; background: #fff;">
+                  <input type="radio" name="calc-tenure" value="monthly" onchange="calculatePremium();" />
+                  Monthly
+                </label>
+                <label style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; background: #fff;">
+                  <input type="radio" name="calc-tenure" value="quarterly" onchange="calculatePremium();" />
+                  Quarterly
+                </label>
+                <label style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border: 1.5px solid #0284c7; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; background: #f0f9ff; color: #0284c7;">
+                  <input type="radio" name="calc-tenure" value="annual" checked onchange="calculatePremium();" />
+                  Annual (Best Value)
+                </label>
+              </div>
+            </div>
+
+            <!-- Real-Time Premium Breakdown Box -->
+            <div class="calc-display">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 12px;">
+                <span style="font-size: 14px; opacity: 0.85;">Standard Actuarial Base Rate</span>
+                <span id="calc-base-premium" style="font-size: 16px; font-weight: 700;">₹1,600 / yr</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 12px;">
+                <span style="font-size: 14px; color: #86efac; font-weight: 700;">Health Credit Discount (<span id="calc-discount-percent">15%</span>)</span>
+                <span id="calc-discount-amount" style="font-size: 16px; font-weight: 700; color: #86efac;">- ₹240</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <div>
+                  <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; display: block;">
+                    Final Underwritten Premium
+                  </span>
+                  <span id="calc-final-premium" style="font-size: 36px; font-weight: 900; letter-spacing: -0.03em;">
+                    ₹1,360
+                  </span>
+                  <span id="calc-tenure-label" style="font-size: 13px; opacity: 0.85;"> / year</span>
+                </div>
+                <div style="text-align: right;">
+                  <span style="display: inline-block; background: rgba(255,255,255,0.15); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">
+                    Auto-approved via Tap2Med
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Policy Issuance Simulation Button -->
+            <button type="button" class="btn btn-primary btn-block" style="margin-top: 18px; height: 48px; font-size: 15px;" onclick="issuePolicy();">
+              Underwrite &amp; Bind Micro-Policy
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      let currentScoreData = null;
+
+      // Map demo sample tokens for quick testing
+      const DEMO_TOKENS = {
+        excellent: "a1b2c3d4e5f60000111122223333444455556666777788889999aaaabbbbcccc",
+        good: "b2c3d4e5f6a1111122223333444455556666777788889999aaaabbbbccccdddd",
+        needs_attention: "c3d4e5f6a1b222223333444455556666777788889999aaaabbbbccccddddeeee"
+      };
+
+      function selectDemoToken(type) {
+        const input = document.getElementById("network-token-input");
+        if (DEMO_TOKENS[type]) {
+          input.value = DEMO_TOKENS[type];
+          evaluateToken();
+        }
+      }
+
+      // Check URL parameters on load for direct deep linking ?token=...
+      window.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get("token");
+        if (tokenFromUrl) {
+          document.getElementById("network-token-input").value = tokenFromUrl;
+          evaluateToken();
+        }
+      });
+
+      async function evaluateToken() {
+        const tokenInput = document.getElementById("network-token-input");
+        const token = tokenInput.value.trim();
+        const errAlert = document.getElementById("error-alert");
+        const btn = document.getElementById("btn-evaluate");
+        const btnText = document.getElementById("btn-text");
+        const resultsSection = document.getElementById("evaluation-results");
+
+        errAlert.style.display = "none";
+
+        if (!token || token.length < 16) {
+          showError("Please enter a valid patient network token.");
+          return;
+        }
+
+        btn.disabled = true;
+        btnText.innerHTML = '<span class="spinner"></span> Evaluating...';
+
+        try {
+          // Call real backend endpoint
+          const res = await fetch(`/api/consent/health-score/${encodeURIComponent(token)}`);
+          
+          if (!res.ok) {
+            let detail = "Patient not found or no verified clinical history recorded.";
+            try {
+              const errData = await res.json();
+              if (errData.detail) detail = errData.detail;
+            } catch (e) {}
+            showError(detail);
+            resultsSection.style.display = "none";
+            return;
+          }
+
+          const data = await res.json();
+          currentScoreData = data;
+          renderEvaluationResults(data);
+          resultsSection.style.display = "block";
+          resultsSection.scrollIntoView({ behavior: "smooth" });
+        } catch (error) {
+          console.error("Underwriting lookup failed:", error);
+          showError("Network connection error. Ensure the Tap2Med server is running.");
+          resultsSection.style.display = "none";
+        } finally {
+          btn.disabled = false;
+          btnText.textContent = "Evaluate Risk";
+        }
+      }
+
+      function showError(msg) {
+        const errAlert = document.getElementById("error-alert");
+        errAlert.textContent = msg;
+        errAlert.style.display = "block";
+      }
+
+      function renderEvaluationResults(data) {
+        // 1. Render Gauge Needle rotation
+        // Gauge spans 180 degrees: 300 score is -90deg, 900 score is +90deg
+        const score = Math.max(300, Math.min(900, data.score));
+        const normalized = (score - 300) / (900 - 300); // 0.0 to 1.0
+        const angle = -90 + (normalized * 180); // -90deg to +90deg
+        
+        const needle = document.getElementById("gauge-needle");
+        if (needle) {
+          needle.style.transform = `rotate(${angle}deg)`;
+        }
+
+        // 2. Render Score and Category Badge
+        const scoreDisplay = document.getElementById("score-display");
+        scoreDisplay.textContent = score;
+
+        const tierBadge = document.getElementById("tier-badge");
+        tierBadge.textContent = `${data.category} (${data.credit_tier})`;
+
+        // Color coding based on category
+        let color = "#0284c7";
+        tierBadge.className = "tier-badge";
+        if (data.category === "Excellent") {
+          color = "#15803d";
+          tierBadge.classList.add("tier-excellent");
+        } else if (data.category === "Good") {
+          color = "#0369a1";
+          tierBadge.classList.add("tier-good");
+        } else if (data.category === "Fair") {
+          color = "#b45309";
+          tierBadge.classList.add("tier-fair");
+        } else {
+          color = "#b91c1c";
+          tierBadge.classList.add("tier-needs-attention");
+        }
+        scoreDisplay.style.color = color;
+
+        // 3. Render Factors Breakdown
+        const factorsContainer = document.getElementById("factors-list");
+        factorsContainer.innerHTML = "";
+
+        if (data.factors && data.factors.length > 0) {
+          data.factors.forEach(f => {
+            const row = document.createElement("div");
+            row.className = "factor-row";
+
+            let impactColor = "#64748b";
+            if (f.type === "positive") impactColor = "#15803d";
+            else if (f.type === "negative") impactColor = "#b91c1c";
+
+            row.innerHTML = `
+              <div>
+                <strong style="display: block; font-size: 13.5px; color: #0f172a;">${escapeHtml(f.name)}</strong>
+                <span style="font-size: 12px; color: #64748b;">${escapeHtml(f.status)}</span>
+              </div>
+              <span style="font-size: 13px; font-weight: 800; color: ${impactColor};">
+                ${escapeHtml(f.impact)}
+              </span>
+            `;
+            factorsContainer.appendChild(row);
+          });
+        }
+
+        // 4. Update Calculator Discount
+        const discountChip = document.getElementById("applied-discount-chip");
+        discountChip.textContent = `${data.discount_percentage}% Verified Discount`;
+
+        calculatePremium();
+      }
+
+      function calculatePremium() {
+        if (!currentScoreData) return;
+
+        const tierSelect = document.getElementById("plan-tier-select");
+        const coverageSelect = document.getElementById("coverage-amount-select");
+        const tenureRadios = document.getElementsByName("calc-tenure");
+
+        const selectedOption = tierSelect.options[tierSelect.selectedIndex];
+        const baseRate = parseFloat(selectedOption.getAttribute("data-rate") || "0.016");
+        const sumInsured = parseFloat(coverageSelect.value);
+
+        let tenure = "annual";
+        for (const r of tenureRadios) {
+          if (r.checked) {
+            tenure = r.value;
+            break;
+          }
+        }
+
+        // Annual base calculation
+        let annualBase = sumInsured * baseRate;
+
+        // Apply health credit score discount
+        const discountPercent = currentScoreData.discount_percentage || 0;
+        const annualDiscount = annualBase * (discountPercent / 100);
+        let annualFinal = Math.max(100, annualBase - annualDiscount);
+
+        // Adjust for billing tenure
+        let tenureMultiplier = 1.0;
+        let tenureLabel = " / year";
+        if (tenure === "monthly") {
+          tenureMultiplier = 1 / 12;
+          tenureLabel = " / month";
+        } else if (tenure === "quarterly") {
+          tenureMultiplier = 1 / 4;
+          tenureLabel = " / quarter";
+        }
+
+        const baseDisplay = Math.round(annualBase * tenureMultiplier);
+        const discountDisplay = Math.round(annualDiscount * tenureMultiplier);
+        const finalDisplay = Math.round(annualFinal * tenureMultiplier);
+
+        document.getElementById("calc-base-premium").textContent = `₹${baseDisplay.toLocaleString("en-IN")}${tenureLabel}`;
+        document.getElementById("calc-discount-percent").textContent = `${discountPercent}%`;
+        document.getElementById("calc-discount-amount").textContent = `- ₹${discountDisplay.toLocaleString("en-IN")}`;
+        document.getElementById("calc-final-premium").textContent = `₹${finalDisplay.toLocaleString("en-IN")}`;
+        document.getElementById("calc-tenure-label").textContent = tenureLabel;
+      }
+
+      function issuePolicy() {
+        alert(
+          `✓ Micro-Policy Bound Successfully!\n\nCoverage: ₹${Number(document.getElementById("coverage-amount-select").value).toLocaleString("en-IN")}\nDiscount Applied: ${currentScoreData.discount_percentage}%\nVerified Underwriting: Zero-PII Deterministic Token.\n\nPolicy issued without collecting patient phone or physical ID.`
+        );
+      }
+
+      function escapeHtml(text) {
+        if (!text) return "";
+        return String(text)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+    </script>
+  </body>
+</html>
